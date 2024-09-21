@@ -25,7 +25,9 @@ export class InvestorRepresentation{
     @Column('boolean')
     isPep: boolean;
 
-    @Column('int')
+    @Column('int',{
+        default: 1
+    })
     status: number;
 
     @ManyToOne(() => Investor, (investor) => investor.investorRepresentation)

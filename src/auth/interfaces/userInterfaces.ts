@@ -1,10 +1,10 @@
 
-export enum eTypeUser{
-    'Persona Natural',
-    'Persona Jurídica'
-}
+export enum eTypeUser {
+    'Persona Natural' = 'Persona Natural',
+    'Persona Jurídica' = 'Persona Jurídica',
+  }
 
 export enum eTypeInterest{
-    'Financiamiento',
-    'Inversiones'
+    'Financiamiento' = 'Financiamiento',
+    'Inversiones' = 'Inversiones',
 }

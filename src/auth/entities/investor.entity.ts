@@ -16,10 +16,7 @@ export class Investor{
     @Column('varchar')
     surname: string;
 
-    @Column('varchar',{
-        unique:true
-    }
-    )
+    @Column('varchar')
     email: string;
 
     @Column('varchar')
@@ -29,7 +26,7 @@ export class Investor{
     user_type: eTypeUser
 
     @Column('varchar')
-    interest: eTypeInterest
+    interest_type: eTypeInterest
 
     @Column('varchar')
     password: string;
@@ -46,6 +43,8 @@ export class Investor{
     @Column('varchar')
     address: string;
 
+    @Column('varchar')
+    country: string;
     //COMPANY DATA
     @Column('varchar')
     type_company_document: string;
@@ -73,7 +72,9 @@ export class Investor{
     })
     roles: ValidRoles
 
-    @Column('int')
+    @Column('int',{
+        default: 1
+    })
     status: number;
 
     @OneToMany(()=>InvestorRepresentation, investorRepresentation=>investorRepresentation.investor)
