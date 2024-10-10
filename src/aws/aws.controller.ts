@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Header, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AwsService } from './aws.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 
 
 @Controller('aws')
@@ -43,6 +43,29 @@ export class AwsController {
       return res.status(200).json(response);
     } catch (error) {
       console.log(error);
+      return res.status(400).json({ msg: error.message });
+    }
+  }
+
+  @Post('upload-doc')
+  @UseInterceptors(AnyFilesInterceptor())
+  async uploadDoc(@Req() req:Request, @Res() res: Response) {
+    try {
+      const response = await this.awsService.uploadDoc(req, res);
+      return response;
+    } catch (error) {
+      return res.status(400).json({ msg: error.message });
+    }
+  }
+
+  @Get('list-docs')
+  async listDocs(@Req() req: Request, @Res() res: Response) {
+    try {
+      const token = req.headers['token'] as string;
+      const docs = await this.awsService.listDocs(token);
+
+      return res.status(200).json(docs);
+    } catch (error) {
       return res.status(400).json({ msg: error.message });
     }
   }

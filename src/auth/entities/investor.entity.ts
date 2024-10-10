@@ -5,6 +5,7 @@ import { InvestorRepresentation } from "./investor_representation.entity";
 import { MyInvestment } from "./my_investments.entity";
 import { Wallet } from "./wallet.entity";
 import { Company } from "./company.entity";
+import { Documentation } from "./documentation.entity";
 
 
 @Entity('investors')
@@ -50,8 +51,15 @@ export class Investor{
     @Column('varchar')
     country: string;
 
-    @Column('varchar')
-    docs_url: string;
+    @Column('timestamp',{
+        default:()=> 'CURRENT_TIMESTAMP - INTERVAL 5 HOUR'
+    })
+    createdAt:Date;
+
+    @Column('timestamp',{
+        default:()=> 'CURRENT_TIMESTAMP - INTERVAL 5 HOUR'
+    })
+    updatedAt:Date;
 
     @Column('varchar',{
         default: 'User'
@@ -74,4 +82,7 @@ export class Investor{
 
     @OneToMany(() => Wallet, wallet => wallet.investor)
     wallets: Wallet[];
+
+    @OneToMany(() => Documentation, documentation => documentation.investor)
+    documentation: Documentation[];
 }

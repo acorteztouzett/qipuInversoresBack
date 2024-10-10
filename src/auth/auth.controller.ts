@@ -31,8 +31,8 @@ export class AuthController {
   }
 
   @Put('edit-account')
-  editAccount(@Headers('token') token, UpdateAuthDto:UpdateAuthDto) {
-    return this.authService.editAccount(token, UpdateAuthDto.investor, UpdateAuthDto.investorRep);
+  editAccount(@Headers('token') token, @Body() UpdateAuthDto:UpdateAuthDto) {
+    return this.authService.editAccount(token, UpdateAuthDto.investor, UpdateAuthDto.investorRep, UpdateAuthDto.company);
   }
 
   @Post('add-investor-rep')

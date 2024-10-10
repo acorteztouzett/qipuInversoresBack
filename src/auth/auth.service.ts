@@ -148,10 +148,11 @@ export class AuthService {
     }
   }
 
-  async editAccount(user:Investor, createUserDto: CreateUserDto, createInvestorRepresentationDto:CreateInvestorRepresentationDto){
+  async editAccount(user:Investor, createUserDto: CreateUserDto, createInvestorRepresentationDto:CreateInvestorRepresentationDto,companyDto:CreateCompanyDto){
     try {
       const {...userData}=createUserDto;
       const {...repData}=createInvestorRepresentationDto;
+      const {...companyData}=companyDto;
 
       const userToUpdate= await this.investorRepository.findOne({
         where:{user_id:user.user_id}
@@ -160,7 +161,7 @@ export class AuthService {
       if(!userToUpdate){
         throw new UnauthorizedException('Invalid credentials');
       }
-
+      
       await this.investorRepository.update(userToUpdate.user_id,{
         names:userData.names,
         surname:userData.surname,
@@ -171,17 +172,15 @@ export class AuthService {
         address:userData.address,
       });
 
-      if(userData.userType===eTypeUser['Persona Jurídica']){
-        const investorRepresentation=this.InvestorRepresentationRepository.create({
-          names:repData.repNames,
-          surname:repData.repSurname,
-          document_type:repData.repDocumentType,
-          document:repData.repDocument,
-          email:repData.repEmail,
-          isPep:repData.repIsPep,
-          investor:userToUpdate
+      if(userToUpdate.user_type===eTypeUser['Persona Jurídica']){
+        await this.companyRepository.update({investor: { user_id: userToUpdate.user_id }}, {
+          company_document:companyData.companyDocument,
+          type_company_document:companyData.typeCompanyDocument,
+          company_name:companyData.companyName,
+          annual_income:companyData.annualIncome,
+          category:companyData.category,
+          operation_type:companyData.operationType
         });
-         await this.InvestorRepresentationRepository.save(investorRepresentation);
       }
 
       return {

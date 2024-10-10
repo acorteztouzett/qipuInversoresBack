@@ -5,6 +5,8 @@ import { AuthModule } from '../auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../auth/entities/user.entity';
+import { Investor } from '../auth/entities/investor.entity';
+import { Documentation } from '../auth/entities/documentation.entity';
 
 @Module({
   controllers: [AwsController],
@@ -12,7 +14,7 @@ import { User } from '../auth/entities/user.entity';
   imports:  [
     ConfigModule,
     AuthModule,
-    TypeOrmModule.forFeature([User])
+    TypeOrmModule.forFeature([User,Investor,Documentation])
   ],
   exports:[TypeOrmModule]
 })

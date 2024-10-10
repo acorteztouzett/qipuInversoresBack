@@ -3,7 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../auth/entities/user.entity';
 import { Repository } from 'typeorm';
 import { DeleteObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { readFile, unlink } from 'fs/promises';
+import { Request, Response } from 'express';
+import { Investor } from '../auth/entities/investor.entity';
+import { Documentation } from '../auth/entities/documentation.entity';
 
 @Injectable()
 export class AwsService {
@@ -18,6 +20,11 @@ export class AwsService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Investor)
+    private readonly investorRepository: Repository<Investor>,
+    @InjectRepository(Documentation)
+    private readonly documentationRepository: Repository<Documentation>,
+
   ) {}
 
   async listFiles(token: string) {
@@ -78,6 +85,66 @@ export class AwsService {
       throw new BadRequestException(`Error uploading file: ${err}`);
     }
   }
+
+  async uploadDoc(req: Request, res: Response) {
+    const token = req.headers['token'] as string;
+    const investor = await this.investorRepository.findOne({ where: { user_id: token } });
+    if (!investor) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const files = req.files as Express.Multer.File[];
+
+    for (let i = 0; i < files.length; i++) {
+      const type=req.body[`type${i+1}`];
+
+      const { mimetype, buffer } = files[i];
+      const params = {
+        Bucket: process.env.AWSBUCKET,
+        Key: `documentacion/${investor.document}/${type}`,
+        Body: buffer,
+        ContentType: mimetype,
+      };
+      try {
+        const upload = new PutObjectCommand(params);
+        await this.s3.send(upload);
+        const doc= this.documentationRepository.create({
+          documentType:type,
+          url: `${process.env.AWSURL}${encodeURIComponent(params.Key)}`,
+          investor:investor
+        });
+        await this.documentationRepository.save(doc);
+      } catch (err) {
+        throw new BadRequestException(`Error uploading file: ${err}`);
+      }
+    }
+
+    return res.status(200).json({ msg: 'uploaded successfully' });
+  }
+
+  async listDocs(token: string) {
+    const investor = await this.investorRepository.findOne({ 
+      where: { user_id: token },
+      relations:['documentation']
+     });
+    if (!investor) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    try {
+      const docs = investor.documentation.map((doc) => {
+        return {
+          type: doc.documentType,
+          url: doc.url,
+          status: doc.status
+        };
+      }); 
+
+      return docs;
+    } catch (err) {
+      throw new BadRequestException(`Error fetching files: ${err.message}`);
+  }
+}
 
   private handleErrors(error: any,type:string):never{
     if(error.code==='23505'){
