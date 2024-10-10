@@ -1,23 +1,23 @@
-import { IsString } from "class-validator";
+import { IsBoolean, IsString } from "class-validator";
 
 
 export class CreateInvestorRepresentationDto{
     @IsString()
-    representationNames: string;
+    repNames: string;
 
     @IsString()
-    representationSurname: string;
+    repSurname: string;
 
     @IsString()
-    representationDocumentType: string;
+    repDocumentType: string;
 
     @IsString()
-    representationDocument: number;
+    repDocument: number;
 
     @IsString()
-    representationEmail: string;
+    repEmail: string;
 
-    @IsString()
-    representationIsPep: boolean;
+    @IsBoolean()
+    repIsPep: boolean;
 
 }

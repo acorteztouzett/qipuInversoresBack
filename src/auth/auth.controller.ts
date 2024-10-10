@@ -1,8 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, HttpException, HttpStatus, Res, Req, UseInterceptors, Headers } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto, RegisterDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { CreateInvestorRepresentationDto } from './dto/create-investor_representation.dto';
+import { GetUser } from './decorators/get-user.decorator';
+import { Auth } from './decorators/auth.decorator';
+import { ValidRoles } from './interfaces/valid-roles';
+import { UpdateAuthDto } from './dto/update-auth.dto';
+import { readFile } from 'fs/promises';
+import { Request, Response } from 'express';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('auth')
 export class AuthController {
@@ -10,7 +17,7 @@ export class AuthController {
 
   @Post('register')
   create(@Body() registerDto: RegisterDto) {
-    return this.authService.create(registerDto.investor, registerDto.investorRep);
+    return this.authService.create(registerDto.investor, registerDto.investorRep, registerDto.company);
   }
 
   @Get('login')
@@ -18,4 +25,60 @@ export class AuthController {
     return this.authService.login(loginUserDto);
   }
 
+  @Get('account-info')
+  findAccout(@Headers('token') token) {
+    return this.authService.getAccount(token);
+  }
+
+  @Put('edit-account')
+  editAccount(@Headers('token') token, UpdateAuthDto:UpdateAuthDto) {
+    return this.authService.editAccount(token, UpdateAuthDto.investor, UpdateAuthDto.investorRep);
+  }
+
+  @Post('add-investor-rep')
+  addInvestorRep(@Headers('token') token, @Body() createInvestorRepresentationDto:CreateInvestorRepresentationDto){
+    return this.authService.addInvestorRep(token, createInvestorRepresentationDto);
+  }
+
+
+  // SERVICIO PRINCIPAL
+  @Post('/ruc_verify')
+  @UseInterceptors(AnyFilesInterceptor())
+  async verifyRuc(@Req() req:Request, @Res() res: Response) {
+    const ruc= req.body.ruc;
+    if (!ruc) {
+      throw new HttpException('RUC is required', HttpStatus.BAD_REQUEST);
+    }
+    try {
+      const data = await readFile('ruc.json', 'utf8');
+      const rucs = JSON.parse(data);
+
+      const validatedRuc = rucs.some(i => i.RUC === parseInt(ruc));
+
+      if (!validatedRuc) {
+        return res.status(401).json({ validate: false });
+      }
+
+      return res.status(200).json({ validate: true });
+    } catch (error) {
+      console.log(error);
+      throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post('email')
+  async checkEmail(@Req() req: Request, @Res() res: Response) {
+    return this.authService.checkEmail(req, res);
+  }
+
+  @Post('token')
+  async resetToken(@Req() req: Request, @Res() res: Response) {
+    return this.authService.resetToken(req, res);
+  }
+
+  @Post('ruc')
+  async checkRuc(@Req() req: Request, @Res() res: Response) {
+
+    return this.authService.checkRuc(req, res);
+  }
 }

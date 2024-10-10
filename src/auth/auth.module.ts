@@ -10,13 +10,25 @@ import { JwtModule } from '@nestjs/jwt';
 import { InvestorRepresentation } from './entities/investor_representation.entity';
 import { Investment } from './entities/investments.entity';
 import { MyInvestment } from './entities/my_investments.entity';
+import { BankAccount } from './entities/bank_account.entity';
+import { Banks } from './entities/banks.entity';
+import { Billing } from './entities/billing.entity';
+import { Company } from './entities/company.entity';
+import { Operation } from './entities/operation.entity';
+import { Operator } from './entities/operator.entity';
+import { Payer } from './entities/payer.entity';
+import { Risk } from './entities/risk.entity';
+import { Wallet } from './entities/wallet.entity';
+import { User } from './entities/user.entity';
 
 @Module({
   controllers: [AuthController],
   providers: [AuthService,JwtStrategy],
   imports:[
     ConfigModule,
-    TypeOrmModule.forFeature([Investor, InvestorRepresentation, Investment, MyInvestment]),
+    TypeOrmModule.forFeature([
+      Investor, InvestorRepresentation, Investment, MyInvestment,BankAccount,Banks,Billing,Company,Operation,Operator,Payer,Risk,Wallet,User
+    ]),
     PassportModule.register({defaultStrategy:'jwt'}),
     JwtModule.registerAsync({
       useFactory:()=>{

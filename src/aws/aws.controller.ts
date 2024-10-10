@@ -1,0 +1,50 @@
+import { Controller, Get, Post, Body, Patch, Param, Delete, Header, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Request, Response } from 'express';
+import { AwsService } from './aws.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+
+@Controller('aws')
+export class AwsController {
+  constructor(private readonly awsService: AwsService) {}
+
+  @Get('listfiles')
+  async listFiles(@Req() req: Request, @Res() res: Response) {
+    try {
+      const token = req.headers['token'] as string;
+      const links = await this.awsService.listFiles(token);
+
+      return res.status(200).json(links);
+    } catch (error) {
+      if (error.status === 401) {
+        return res.status(401).json({ msg: 'User not found' });
+      }
+      return res.status(400).json({ msg: error.message });
+    }
+  }
+
+
+  @Post('upload/:type')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(
+    @Req() req: Request,
+    @Res() res: Response,
+    @UploadedFile() file: Express.Multer.File,
+    @Param('type') type: string
+  ) {
+    try {
+      const allowedTypes= ['ruc','dni','rtt','repre','info','otros'];
+      if(!allowedTypes.includes(type)){
+        return res.status(400).json({ msg: 'Invalid type' });
+      }
+      const token = req.headers.token as string;
+      const response = await this.awsService.uploadFile(token, file, type);
+
+      return res.status(200).json(response);
+    } catch (error) {
+      console.log(error);
+      return res.status(400).json({ msg: error.message });
+    }
+  }
+
+}

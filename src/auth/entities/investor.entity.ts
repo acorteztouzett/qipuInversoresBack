@@ -3,6 +3,8 @@ import { eTypeInterest, eTypeUser } from "../interfaces/userInterfaces";
 import { ValidRoles } from "../interfaces/valid-roles";
 import { InvestorRepresentation } from "./investor_representation.entity";
 import { MyInvestment } from "./my_investments.entity";
+import { Wallet } from "./wallet.entity";
+import { Company } from "./company.entity";
 
 
 @Entity('investors')
@@ -28,7 +30,9 @@ export class Investor{
     @Column('varchar')
     interest_type: eTypeInterest
 
-    @Column('varchar')
+    @Column('varchar',{
+        select: false
+    })
     password: string;
 
     @Column('varchar')
@@ -38,31 +42,13 @@ export class Investor{
     document: number;
 
     @Column('boolean')
-    isPep: boolean;
+    pep: boolean;
 
     @Column('varchar')
     address: string;
 
     @Column('varchar')
     country: string;
-    //COMPANY DATA
-    @Column('varchar')
-    type_company_document: string;
-
-    @Column('varchar')
-    company_document: number;
-
-    @Column('varchar')
-    company_name: string;
-
-    @Column('varchar')
-    category: string;
-
-    @Column('varchar')
-    operation_type: string;
-
-    @Column('varchar')
-    annual_income: string;
 
     @Column('varchar')
     docs_url: string;
@@ -77,9 +63,15 @@ export class Investor{
     })
     status: number;
 
+    @OneToMany(() =>Company, company=>company.investor)
+    company: Company[];
+
     @OneToMany(()=>InvestorRepresentation, investorRepresentation=>investorRepresentation.investor)
     investorRepresentation: InvestorRepresentation[];
 
     @OneToMany(() => MyInvestment, (myInvestment) => myInvestment.investor)
     myInvestments: MyInvestment[];
+
+    @OneToMany(() => Wallet, wallet => wallet.investor)
+    wallets: Wallet[];
 }
