@@ -15,6 +15,7 @@ import { Request, Response } from 'express';
 import { User } from './entities/user.entity';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { Company } from './entities/company.entity';
+import { EditInvestorRepresentationDto } from './dto/edit-investor_representation.dto';
 
 @Injectable()
 export class AuthService {
@@ -63,16 +64,18 @@ export class AuthService {
          });
           await this.InvestorRepresentationRepository.save(investorRepresentation);
 
-          const company=this.companyRepository.create({
-            company_name:createCompany.companyName,
-            type_company_document:createCompany.typeCompanyDocument,
-            company_document:createCompany.companyDocument,
-            annual_income:createCompany.annualIncome,
-            category:createCompany.category,
-            operation_type:createCompany.operationType,
-            investor:user
-          });
-          await this.companyRepository.save(company);
+          if(Object.keys(createCompany).length>0){
+            const company=this.companyRepository.create({
+              company_name:createCompany.companyName,
+              type_company_document:createCompany.typeCompanyDocument,
+              company_document:createCompany.companyDocument,
+              annual_income:createCompany.annualIncome,
+              category:createCompany.category,
+              operation_type:createCompany.operationType,
+              investor:user
+            });
+            await this.companyRepository.save(company);
+          }
       }
       
       // const url= `${process.env.CONFIRMATION_URL}?token=${tokenVerification}` 
@@ -148,29 +151,32 @@ export class AuthService {
     }
   }
 
-  async editAccount(user:Investor, createUserDto: CreateUserDto, createInvestorRepresentationDto:CreateInvestorRepresentationDto,companyDto:CreateCompanyDto){
+  async editAccount(token, createUserDto: CreateUserDto,companyDto:CreateCompanyDto){
     try {
       const {...userData}=createUserDto;
-      const {...repData}=createInvestorRepresentationDto;
       const {...companyData}=companyDto;
 
       const userToUpdate= await this.investorRepository.findOne({
-        where:{user_id:user.user_id}
+        where:{user_id:token}
       });
 
       if(!userToUpdate){
         throw new UnauthorizedException('Invalid credentials');
       }
       
-      await this.investorRepository.update(userToUpdate.user_id,{
-        names:userData.names,
-        surname:userData.surname,
-        document_type:userData.documentType,
-        document:userData.document,
-        email:userData.email,
-        phone:userData.phone,
-        address:userData.address,
-      });
+      if(Object.keys(userData).length>0){
+        await this.investorRepository.update(userToUpdate.user_id,{
+          names:userData.names,
+          surname:userData.surname,
+          document_type:userData.documentType,
+          document:userData.document,
+          email:userData.email,
+          password:userData.password?hashSync(userData.password,10):userToUpdate.password,
+          phone:userData.phone,
+          address:userData.address,
+        });
+      }
+
 
       if(userToUpdate.user_type===eTypeUser['Persona Jurídica']){
         await this.companyRepository.update({investor: { user_id: userToUpdate.user_id }}, {
@@ -219,6 +225,54 @@ export class AuthService {
       }
     } catch (error) {
       this.handleErrors(error,'addInvestorRep')
+    }
+  }
+
+  async editInvestorRep(token, editInvestorRepresentationDto:EditInvestorRepresentationDto){
+    const {...repData}=editInvestorRepresentationDto;
+    const investor= await this.investorRepository.findOne({ where: { user_id: token , user_type:eTypeUser['Persona Jurídica']} });
+
+    if(!investor){
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const investorRep= await this.InvestorRepresentationRepository.findOne({ where: { investor: investor, representation_id:repData.representation_id } });
+
+    if(!investorRep){
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    await this.InvestorRepresentationRepository.update(investorRep.representation_id,{
+      names:repData.repNames,
+      surname:repData.repSurname,
+      document_type:repData.repDocumentType,
+      document:repData.repDocument,
+      email:repData.repEmail,
+      isPep:repData.repIsPep,
+    });
+
+    return {
+      message:'Rep updated successfully'
+    }
+  }
+
+  async deleteInvestorRep(token, representation_id){
+    const investor= await this.investorRepository.findOne({ where: { user_id: token , user_type:eTypeUser['Persona Jurídica']} });
+
+    if(!investor){
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const investorRep= await this.InvestorRepresentationRepository.findOne({ where: { representation_id: representation_id, investor:investor } });
+
+    if(!investorRep){
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    await this.InvestorRepresentationRepository.delete(investorRep.representation_id);
+
+    return {
+      message:'Rep deleted successfully'
     }
   }
 

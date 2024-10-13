@@ -99,6 +99,11 @@ export class AwsService {
       const type=req.body[`type${i+1}`];
 
       const { mimetype, buffer } = files[i];
+
+      let existingDoc = await this.documentationRepository.findOne({
+        where: { documentType: type, investor: investor },
+      });
+      
       const params = {
         Bucket: process.env.AWSBUCKET,
         Key: `documentacion/${investor.document}/${type}`,
@@ -108,12 +113,19 @@ export class AwsService {
       try {
         const upload = new PutObjectCommand(params);
         await this.s3.send(upload);
-        const doc= this.documentationRepository.create({
-          documentType:type,
-          url: `${process.env.AWSURL}${encodeURIComponent(params.Key)}`,
-          investor:investor
-        });
-        await this.documentationRepository.save(doc);
+        const docUrl = `${process.env.AWSURL}${encodeURIComponent(params.Key)}`;
+
+        if (existingDoc) {
+          existingDoc.url = docUrl;
+          await this.documentationRepository.update(existingDoc.id, { url: docUrl, documentType: type });
+        } else {
+          const newDoc = this.documentationRepository.create({
+            documentType: type,
+            url: docUrl,
+            investor: investor,
+          });
+          await this.documentationRepository.save(newDoc);
+        }
       } catch (err) {
         throw new BadRequestException(`Error uploading file: ${err}`);
       }

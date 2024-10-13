@@ -10,6 +10,7 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { readFile } from 'fs/promises';
 import { Request, Response } from 'express';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { EditInvestorRepresentationDto } from './dto/edit-investor_representation.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -32,7 +33,7 @@ export class AuthController {
 
   @Put('edit-account')
   editAccount(@Headers('token') token, @Body() UpdateAuthDto:UpdateAuthDto) {
-    return this.authService.editAccount(token, UpdateAuthDto.investor, UpdateAuthDto.investorRep, UpdateAuthDto.company);
+    return this.authService.editAccount(token, UpdateAuthDto.investor, UpdateAuthDto.company);
   }
 
   @Post('add-investor-rep')
@@ -40,6 +41,15 @@ export class AuthController {
     return this.authService.addInvestorRep(token, createInvestorRepresentationDto);
   }
 
+  @Put('edit-investor-rep')
+  editInvestorRep(@Headers('token') token, @Body() editInvestorRepresentationDto:EditInvestorRepresentationDto){
+    return this.authService.editInvestorRep(token, editInvestorRepresentationDto);
+  }
+
+  @Delete('delete-investor-rep')
+  deleteInvestorRep(@Headers('token') token, @Body() {representation_id}){
+    return this.authService.deleteInvestorRep(token, representation_id);
+  }
 
   // SERVICIO PRINCIPAL
   @Post('/ruc_verify')

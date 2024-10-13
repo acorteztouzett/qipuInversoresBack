@@ -8,10 +8,6 @@ export class UpdateAuthDto {
     @IsOptional()
     investor: CreateUserDto;
 
-    @IsArray()
-    @IsOptional()
-    investorRep: CreateInvestorRepresentationDto;
-
     @IsObject()
     @IsOptional()
     company: CreateCompanyDto;
