@@ -37,7 +37,6 @@ export class AuthService {
   async create(createUserDto: CreateUserDto, createInvestorRepresentationDto:CreateInvestorRepresentationDto, createCompany: CreateCompanyDto) {
     try {
       const {...userData}=createUserDto;
-      const {...repData}=createInvestorRepresentationDto;
       //  const tokenVerification=customAlphabet(this.alphabet,10)();
       const user=this.investorRepository.create({
         country: userData.country,
@@ -58,9 +57,11 @@ export class AuthService {
         terms_conditions: userData.termsAndConditions,
       });
       await this.investorRepository.save(user);
-
+      
       if(userData.userType===eTypeUser['Persona Jurídica']){
-         const investorRepresentation=this.InvestorRepresentationRepository.create({
+        const {...repData}=createInvestorRepresentationDto;
+
+        const investorRepresentation=this.InvestorRepresentationRepository.create({
            names:repData.repNames,
            surname:repData.repSurname,
            document_type:repData.repDocumentType,
