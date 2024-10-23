@@ -64,7 +64,19 @@ export class CreateUserDto {
 
     @IsString()
     @IsOptional()
-    annualIncome: string; 
+    annualIncome: string;
+    
+    @IsObject()
+    department: object;
+
+    @IsObject()
+    province: object;
+
+    @IsObject()
+    district: object;
+
+    @IsBoolean()
+    termsAndConditions: boolean;
 }
 
 export class RegisterDto{

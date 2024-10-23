@@ -48,6 +48,15 @@ export class Investor{
     @Column('varchar')
     address: string;
 
+    @Column('json')
+    department: object;
+
+    @Column('json')
+    province: object;
+
+    @Column('json')
+    district: object;
+
     @Column('varchar')
     country: string;
 
@@ -70,6 +79,9 @@ export class Investor{
         default: 1
     })
     status: number;
+
+    @Column('bool')
+    terms_conditions: boolean;
 
     @OneToMany(() =>Company, company=>company.investor)
     company: Company[];

@@ -7,6 +7,7 @@ import { PayerModule } from './payer/payer.module';
 import { BillingsModule } from './billings/billings.module';
 import { UserModule } from './user/user.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { UtilModule } from './util/util.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     PayerModule,
     BillingsModule,
     UserModule,
+    UtilModule,
   ],
 })
 export class AppModule {}

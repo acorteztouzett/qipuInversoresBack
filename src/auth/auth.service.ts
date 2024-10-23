@@ -16,6 +16,8 @@ import { User } from './entities/user.entity';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { Company } from './entities/company.entity';
 import { EditInvestorRepresentationDto } from './dto/edit-investor_representation.dto';
+import { MailerService } from '@nestjs-modules/mailer';
+import { templateVerificar, templateVerificarAdmin } from '../utils/emailTemplates';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +30,8 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly mailerService: MailerService
   ){}
 
   async create(createUserDto: CreateUserDto, createInvestorRepresentationDto:CreateInvestorRepresentationDto, createCompany: CreateCompanyDto) {
@@ -49,6 +52,10 @@ export class AuthService {
         interest_type: userData.interestType,
         pep: userData.isPep,
         address: userData.address,
+        department: userData.department,
+        province: userData.province,
+        district: userData.district,
+        terms_conditions: userData.termsAndConditions,
       });
       await this.investorRepository.save(user);
 
@@ -80,11 +87,11 @@ export class AuthService {
       
       // const url= `${process.env.CONFIRMATION_URL}?token=${tokenVerification}` 
       // await this.mailerService.sendMail({
-      //   from:process.env.MAIL_USER,
-      //   to:user.email,
-      //   subject:'Andean Crown SAF ha creado tu cuenta',
-      //   html:CreateUserMail(userData.names?userData.names:userData.legalRepresentation,url)
-      // })
+      //    from:process.env.MAIL_USER,
+      //    to:user.email,
+      //    subject:'Andean Crown SAF ha creado tu cuenta',
+      //    html:templateVerificarAdmin(`${userData.names} ${userData.surname}`,userData.email)
+      //  })
       return {
         message:'User created successfully',
         email:user.email,
