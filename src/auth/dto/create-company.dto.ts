@@ -1,4 +1,4 @@
-import { IsString } from "class-validator";
+import { IsObject, IsString } from "class-validator";
 
 export class CreateCompanyDto{
 
@@ -14,8 +14,8 @@ export class CreateCompanyDto{
     @IsString()
     annualIncome: string;
 
-    @IsString()
-    category: string;
+    @IsObject()
+    category: object;
 
     @IsString()
     operationType: string;

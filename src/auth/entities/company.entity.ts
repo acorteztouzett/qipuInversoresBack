@@ -18,8 +18,8 @@ export class Company {
     @Column('varchar')
     annual_income: string;
     
-    @Column('varchar')
-    category: string;
+    @Column('json')
+    category: object;
 
     @Column('varchar')
     operation_type: string;

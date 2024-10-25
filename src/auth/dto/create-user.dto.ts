@@ -1,4 +1,4 @@
-import { IsBoolean, IsEmail, IsEnum, IsJSON, IsObject, IsOptional, isString, IsString } from "class-validator";
+import { IsArray, IsBoolean, IsEmail, IsEnum, IsJSON, IsObject, IsOptional, isString, IsString } from "class-validator";
 import { eTypeInterest, eTypeUser } from "../interfaces/userInterfaces";
 import { CreateInvestorRepresentationDto } from "./create-investor_representation.dto";
 import { CreateCompanyDto } from "./create-company.dto";
@@ -83,7 +83,7 @@ export class RegisterDto{
     @IsObject()
     investor: CreateUserDto;
 
-    @IsObject()
+    @IsArray()
     @IsOptional()
     investorRep: CreateInvestorRepresentationDto;
 
