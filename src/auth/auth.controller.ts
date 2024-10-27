@@ -21,7 +21,7 @@ export class AuthController {
     return this.authService.create(registerDto.investor, [registerDto.investorRep], registerDto.company);
   }
 
-  @Get('login')
+  @Post('login')
   findAll(@Body() loginUserDto: LoginUserDto) {
     return this.authService.login(loginUserDto);
   }

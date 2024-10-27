@@ -8,6 +8,7 @@ import { BillingsModule } from './billings/billings.module';
 import { UserModule } from './user/user.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { UtilModule } from './util/util.module';
+import { BankModule } from './bank/bank.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { UtilModule } from './util/util.module';
     BillingsModule,
     UserModule,
     UtilModule,
+    BankModule,
   ],
 })
 export class AppModule {}

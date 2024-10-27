@@ -6,6 +6,7 @@ import { MyInvestment } from "./my_investments.entity";
 import { Wallet } from "./wallet.entity";
 import { Company } from "./company.entity";
 import { Documentation } from "./documentation.entity";
+import { BankAccount } from "./bank_account.entity";
 
 
 @Entity('investors')
@@ -97,4 +98,7 @@ export class Investor{
 
     @OneToMany(() => Documentation, documentation => documentation.investor)
     documentation: Documentation[];
+
+    @OneToMany(() =>BankAccount, bank_account => bank_account.investor)
+    bank_accounts: BankAccount[];
 }
