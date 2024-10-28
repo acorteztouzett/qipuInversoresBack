@@ -16,8 +16,23 @@ export class BankService {
     private readonly investorRepository: Repository<Investor>
   ){}
 
-  create(token:string, createBankDto: CreateBankDto) {
-    return 'This action adds a new bank';
+  async create(token:string, createBankDto: CreateBankDto) {
+    try {
+      const investor= await this.investorRepository.findOne({where:{user_id:token}});
+
+      if(!investor){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const account = this.bankAccRepository.create(createBankDto);
+      account.investor = investor;
+      await this.bankAccRepository.save(account);
+
+      return {message:'Bank account created successfully'};
+      
+    } catch (error) {
+      return this.handleErrors(error,'create')
+    }
   }
 
   async findAll(token:string) {
@@ -35,16 +50,45 @@ export class BankService {
     }
   }
 
-  findOne(token:string, id: number) {
-    return `This action returns a #${id} bank`;
+  async update(token:string, id: string, updateBankDto: UpdateBankDto) {
+    try {
+      const investor= await this.investorRepository.findOne({where:{user_id:token}});
+      if(!investor){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const account = await this.bankAccRepository.findOne({where:{id:id, investor: investor}});
+      if(!account){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      await this.bankAccRepository.update(account.id,updateBankDto);
+
+      return {message:'Bank account updated successfully'};
+    } catch (error) {
+      return this.handleErrors(error,'update')
+    }
   }
 
-  update(token:string, id: number, updateBankDto: UpdateBankDto) {
-    return `This action updates a #${id} bank`;
-  }
+  async remove(token:string, id: string) {
+    try {
+      const investor= await this.investorRepository.findOne({where:{user_id:token}});
+      if(!investor){
+        throw new UnauthorizedException('Invalid credentials');
+      }
 
-  remove(token:string, id: number) {
-    return `This action removes a #${id} bank`;
+      const account = await this.bankAccRepository.findOne({where:{id:id, investor: investor}});
+
+      if(!account){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      await this.bankAccRepository.remove(account);
+      return {message:'Bank account deleted successfully'}
+
+    } catch (error) {
+      return this.handleErrors(error,'remove')
+    }
   }
 
   private handleErrors(error: any,type:string):never{

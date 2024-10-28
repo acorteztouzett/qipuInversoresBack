@@ -18,7 +18,7 @@ export class AuthController {
 
   @Post('register')
   create(@Body() registerDto: RegisterDto) {
-    return this.authService.create(registerDto.investor, [registerDto.investorRep], registerDto.company);
+    return this.authService.create(registerDto.investor, registerDto.investorRep, registerDto.company);
   }
 
   @Post('login')

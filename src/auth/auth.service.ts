@@ -34,7 +34,7 @@ export class AuthService {
     private readonly mailerService: MailerService
   ){}
 
-  async create(createUserDto: CreateUserDto, createInvestorRepresentationDto:CreateInvestorRepresentationDto[], createCompany: CreateCompanyDto) {
+  async create(createUserDto: CreateUserDto, createInvestorRepresentationDto:CreateInvestorRepresentationDto, createCompany: CreateCompanyDto) {
     try {
       const {...userData}=createUserDto;
       //  const tokenVerification=customAlphabet(this.alphabet,10)();
@@ -59,14 +59,16 @@ export class AuthService {
       await this.investorRepository.save(user);
       
       if(userData.userType===eTypeUser['Persona Jurídica']){
-        for (const rep of createInvestorRepresentationDto) {
-          const investorRepresentation=this.InvestorRepresentationRepository.create({
-            names:rep.repNames,
-            surname:rep.repSurname,
-            document_type:rep.repDocumentType,
-            document:rep.repDocument,
-            email:rep.repEmail,
-            isPep:rep.repIsPep,
+        const repData = Array.isArray(createInvestorRepresentationDto) ? createInvestorRepresentationDto : [createInvestorRepresentationDto];
+        for (let i=0; i< repData.length; i++){
+          console.log(repData[i])
+          let investorRepresentation=this.InvestorRepresentationRepository.create({
+            names:repData[i].repNames,
+            surname:repData[i].repSurname,
+            document_type:repData[i].repDocumentType,
+            document:repData[i].repDocument,
+            email:repData[i].repEmail,
+            isPep:repData[i].repIsPep,
             investor:user
           });
           await this.InvestorRepresentationRepository.save(investorRepresentation);
