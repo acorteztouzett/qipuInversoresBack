@@ -22,6 +22,9 @@ export class InvestorRepresentation{
     @Column('varchar')
     email: string;
 
+    @Column('varchar')
+    charge: string;
+
     @Column('boolean')
     isPep: boolean;
 

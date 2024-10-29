@@ -69,6 +69,7 @@ export class AuthService {
             document:repData[i].repDocument,
             email:repData[i].repEmail,
             isPep:repData[i].repIsPep,
+            charge:repData[i].repCharge,
             investor:user
           });
           await this.InvestorRepresentationRepository.save(investorRepresentation);
@@ -226,6 +227,7 @@ export class AuthService {
         document:repData.repDocument,
         email:repData.repEmail,
         isPep:repData.repIsPep,
+        charge:repData.repCharge,
         investor:investor
       });
        await this.InvestorRepresentationRepository.save(investorRepresentation);
@@ -258,6 +260,7 @@ export class AuthService {
       document_type:repData.repDocumentType,
       document:repData.repDocument,
       email:repData.repEmail,
+      charge: repData.repCharge,
       isPep:repData.repIsPep,
     });
 

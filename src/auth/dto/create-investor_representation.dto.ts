@@ -17,6 +17,9 @@ export class CreateInvestorRepresentationDto{
     @IsString()
     repEmail: string;
 
+    @IsString()
+    repCharge: string;
+
     @IsBoolean()
     repIsPep: boolean;
 
