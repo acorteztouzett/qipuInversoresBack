@@ -241,51 +241,71 @@ export class AuthService {
   }
 
   async editInvestorRep(token, editInvestorRepresentationDto:EditInvestorRepresentationDto){
-    const {...repData}=editInvestorRepresentationDto;
-    const investor= await this.investorRepository.findOne({ where: { user_id: token , user_type:eTypeUser['Persona Jurídica']} });
+    try {
+      const {...repData}=editInvestorRepresentationDto;
+      const investor= await this.investorRepository.findOne({ where: { user_id: token , user_type:eTypeUser['Persona Jurídica']} });
 
-    if(!investor){
-      throw new UnauthorizedException('Invalid credentials');
-    }
+      if(!investor){
+        throw new UnauthorizedException('Invalid credentials');
+      }
 
-    const investorRep= await this.InvestorRepresentationRepository.findOne({ where: { investor: investor, representation_id:repData.representation_id } });
+      const investorRep= await this.InvestorRepresentationRepository.findOne({ 
+        relations:['investor'],
+        where: { investor:{
+          user_id:token
+        }, representation_id:repData.representation_id }
+      });
 
-    if(!investorRep){
-      throw new UnauthorizedException('Invalid credentials');
-    }
+      if(!investorRep){
+        throw new UnauthorizedException('Invalid credentials');
+      }
 
-    await this.InvestorRepresentationRepository.update(investorRep.representation_id,{
-      names:repData.repNames,
-      surname:repData.repSurname,
-      document_type:repData.repDocumentType,
-      document:repData.repDocument,
-      email:repData.repEmail,
-      charge: repData.repCharge,
-      isPep:repData.repIsPep,
-    });
+      await this.InvestorRepresentationRepository.update(investorRep.representation_id,{
+        names:repData.repNames,
+        surname:repData.repSurname,
+        document_type:repData.repDocumentType,
+        document:repData.repDocument,
+        email:repData.repEmail,
+        charge: repData.repCharge,
+        isPep:repData.repIsPep,
+      });
 
-    return {
-      message:'Rep updated successfully'
+      return {
+        message:'Rep updated successfully'
+      }
+    } catch (error) {
+      console.log(error)
+      return this.handleErrors(error,'editInvestorRep')
     }
   }
 
   async deleteInvestorRep(token, representation_id){
-    const investor= await this.investorRepository.findOne({ where: { user_id: token , user_type:eTypeUser['Persona Jurídica']} });
+    try {
+      const investor= await this.investorRepository.findOne({ where: { user_id: token , user_type:eTypeUser['Persona Jurídica']} });
 
-    if(!investor){
-      throw new UnauthorizedException('Invalid credentials');
-    }
+      if(!investor){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+  
+      const investorRep= await this.InvestorRepresentationRepository.findOne({ 
+        relations:['investor'],
+        where: { investor:{
+          user_id:token
+        }, representation_id:representation_id }
+      });
 
-    const investorRep= await this.InvestorRepresentationRepository.findOne({ where: { representation_id: representation_id, investor:investor } });
-
-    if(!investorRep){
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    await this.InvestorRepresentationRepository.delete(investorRep.representation_id);
-
-    return {
-      message:'Rep deleted successfully'
+      if(!investorRep){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+  
+      await this.InvestorRepresentationRepository.delete(investorRep.representation_id);
+  
+      return {
+        message:'Rep deleted successfully'
+      }
+    } catch (error) {
+      console.log(error)
+      return this.handleErrors(error,'deleteInvestorRep')
     }
   }
 
