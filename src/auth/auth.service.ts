@@ -328,6 +328,26 @@ export class AuthService {
     }
   }
 
+  async changeStatement(token,statementOfFunds){
+    try {
+      const user= await this.investorRepository.findOne({ where: { user_id: token } });
+
+      if(!user){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      await this.investorRepository.update(user.user_id,{
+        statement_funds:statementOfFunds
+      });
+
+      return {
+        message:'Statement changed successfully'
+      }
+    } catch (error) {
+      this.handleErrors(error,'changeStatement')
+    }
+  }
+
   async checkRuc(@Req() req: Request,@Res() res: Response){
     const ruc = req.body.ruc;
     

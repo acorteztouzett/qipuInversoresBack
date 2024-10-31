@@ -56,6 +56,11 @@ export class AuthController {
     return this.authService.deleteInvestorRep(token, representation_id);
   }
 
+  @Put('change-statement')
+  changeStatement(@Headers('token') token, @Body() {statementOfFunds}) {
+    return this.authService.changeStatement(token, statementOfFunds);
+  }
+
   // SERVICIO PRINCIPAL
   @Post('/ruc_verify')
   @UseInterceptors(AnyFilesInterceptor())

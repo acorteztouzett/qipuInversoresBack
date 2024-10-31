@@ -81,6 +81,9 @@ export class Investor{
     })
     status: number;
 
+    @Column('varchar')
+    statement_funds: string;
+
     @Column('bool')
     terms_conditions: boolean;
 
