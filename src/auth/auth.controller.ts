@@ -36,6 +36,11 @@ export class AuthController {
     return this.authService.editAccount(token, UpdateAuthDto.investor, UpdateAuthDto.company);
   }
 
+  @Put('change-password')
+  changePassword(@Headers('token') token, @Body() {password}) {
+    return this.authService.changePassword(token, password);
+  }
+
   @Post('add-investor-rep')
   addInvestorRep(@Headers('token') token, @Body() createInvestorRepresentationDto:CreateInvestorRepresentationDto){
     return this.authService.addInvestorRep(token, createInvestorRepresentationDto);

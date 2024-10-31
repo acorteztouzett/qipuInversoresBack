@@ -164,13 +164,12 @@ export class AuthService {
 
   async editAccount(token, createUserDto: CreateUserDto,companyDto:CreateCompanyDto){
     try {
-      const {...userData}=createUserDto;
-      const {...companyData}=companyDto;
-
+      const {password,...userData}=createUserDto;
+      
       const userToUpdate= await this.investorRepository.findOne({
         where:{user_id:token}
       });
-
+      
       if(!userToUpdate){
         throw new UnauthorizedException('Invalid credentials');
       }
@@ -182,14 +181,14 @@ export class AuthService {
           document_type:userData.documentType,
           document:userData.document,
           email:userData.email,
-          password:userData.password?hashSync(userData.password,10):userToUpdate.password,
           phone:userData.phone,
           address:userData.address,
         });
       }
-
-
+      
+      
       if(userToUpdate.user_type===eTypeUser['Persona Jurídica']){
+        const {...companyData}=companyDto;
         await this.companyRepository.update({investor: { user_id: userToUpdate.user_id }}, {
           company_document:companyData.companyDocument,
           type_company_document:companyData.typeCompanyDocument,
@@ -207,6 +206,26 @@ export class AuthService {
     } catch (error) {
       console.log(error)
       this.handleErrors(error,'editAccount')
+    }
+  }
+
+  async changePassword(token, password){
+    try {
+      const user= await this.investorRepository.findOne({ where: { user_id: token } });
+
+      if(!user){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      await this.investorRepository.update(user.user_id,{
+        password:hashSync(password,10)
+      });
+
+      return {
+        message:'Password changed successfully'
+      }
+    } catch (error) {
+      this.handleErrors(error,'changePassword')
     }
   }
 
