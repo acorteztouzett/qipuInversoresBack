@@ -6,6 +6,8 @@ import { AuthModule } from '../auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Investor } from '../auth/entities/investor.entity';
 import { BankAccount } from '../auth/entities/bank_account.entity';
+import { Wallet } from '../auth/entities/wallet.entity';
+import { Transaction } from '../auth/entities/transaction.entity';
 
 @Module({
   controllers: [BankController],
@@ -13,7 +15,7 @@ import { BankAccount } from '../auth/entities/bank_account.entity';
   imports: [
     ConfigModule,
     AuthModule,
-    TypeOrmModule.forFeature([Investor,BankAccount])
+    TypeOrmModule.forFeature([Investor,BankAccount,Wallet,Transaction])
   ]
 })
 export class BankModule {}
