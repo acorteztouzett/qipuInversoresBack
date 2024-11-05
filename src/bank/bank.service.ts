@@ -28,8 +28,18 @@ export class BankService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      const account = this.bankAccRepository.create(createBankDto);
-      account.investor = investor;
+      const account = this.bankAccRepository.create({
+        bank_acc: createBankDto.accountNumber,
+        holder: createBankDto.holder,
+        bank_name: createBankDto.bankName,
+        cci: createBankDto.cci,
+        currency: createBankDto.currency,
+        details: createBankDto.details,
+        situation: createBankDto.situation,
+        status: createBankDto.status,
+        type_account: createBankDto.typeAccount,
+        investor: investor
+      });
       await this.bankAccRepository.save(account);
 
       return {message:'Bank account created successfully'};
