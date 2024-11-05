@@ -52,7 +52,6 @@ export class BankService {
       
       return accounts;
     } catch (error) {
-      console.log(error)
       return this.handleErrors(error,'findAll')
     }
   }
@@ -64,15 +63,30 @@ export class BankService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      const account = await this.bankAccRepository.findOne({where:{id:id, investor: investor}});
+      const account = await this.bankAccRepository.findOne({
+        where:{id:id, investor: {
+          user_id: investor.user_id
+        }}
+      });
       if(!account){
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      await this.bankAccRepository.update(account.id,updateBankDto);
+      await this.bankAccRepository.update(account.id,{
+        bank_acc: updateBankDto.accountNumber,
+        holder: updateBankDto.holder,
+        bank_name: updateBankDto.bankName,
+        cci: updateBankDto.cci,
+        currency: updateBankDto.currency,
+        details: updateBankDto.details,
+        situation: updateBankDto.situation,
+        status: updateBankDto.status,
+        type_account: updateBankDto.typeAccount
+      });
 
       return {message:'Bank account updated successfully'};
     } catch (error) {
+      console.log(error)
       return this.handleErrors(error,'update')
     }
   }
@@ -84,7 +98,11 @@ export class BankService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      const account = await this.bankAccRepository.findOne({where:{id:id, investor: investor}});
+      const account = await this.bankAccRepository.findOne({
+        where:{id:id, investor: {
+          user_id: investor.user_id
+        }}
+      });
 
       if(!account){
         throw new UnauthorizedException('Invalid credentials');
