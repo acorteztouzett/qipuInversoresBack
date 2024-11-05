@@ -46,10 +46,13 @@ export class BankService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      const accounts = await this.bankAccRepository.find({where:{investor: investor}});
+      const accounts = await this.bankAccRepository.find({
+        where: { investor: { user_id: investor.user_id } },
+      });
       
       return accounts;
     } catch (error) {
+      console.log(error)
       return this.handleErrors(error,'findAll')
     }
   }

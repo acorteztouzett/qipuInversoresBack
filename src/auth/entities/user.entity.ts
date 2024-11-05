@@ -107,6 +107,4 @@ export class User {
     @ManyToOne(() => Operator, operator => operator.user)
     operator: Operator;
 
-    @OneToMany(() =>BankAccount, bank_account => bank_account.user)
-    bank_accounts: BankAccount[];
 }

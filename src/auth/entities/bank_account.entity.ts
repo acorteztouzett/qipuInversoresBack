@@ -37,10 +37,7 @@ export class BankAccount{
     )
     status: string;
 
-    @ManyToOne(() => User, user => user.bank_accounts)
-    user: User;
-
-    @ManyToOne(() => User, user => user.bank_accounts)
+    @ManyToOne(() => Investor, user => user.bank_accounts)
     investor: Investor;
 
     @OneToMany(() => Transaction, transaction => transaction.bank_account)
