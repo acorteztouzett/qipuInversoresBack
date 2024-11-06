@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { Investor } from '../auth/entities/investor.entity';
 import { SearchTransactionDto } from './dto/search-transaction.dto';
 import { Transaction } from '../auth/entities/transaction.entity';
+import { Wallet } from '../auth/entities/wallet.entity';
 
 @Injectable()
 export class BankService {
@@ -17,7 +18,9 @@ export class BankService {
     @InjectRepository(Investor)
     private readonly investorRepository: Repository<Investor>,
     @InjectRepository(Transaction)
-    private readonly transactionRepository: Repository<Transaction>
+    private readonly transactionRepository: Repository<Transaction>,
+    @InjectRepository(Wallet)
+    private readonly walletRepository: Repository<Wallet>,
   ){}
 
   async create(token:string, createBankDto: CreateBankDto) {
@@ -28,24 +31,63 @@ export class BankService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
+      const checkBanAcc= await this.checkIfBankAccExistsBeforeCreate(token,createBankDto.currency);
+
+      if(checkBanAcc){
+        throw new UnauthorizedException(`Bank account with ${createBankDto.currency} currency already exists`);
+      }
+
       const account = this.bankAccRepository.create({
         bank_acc: createBankDto.accountNumber,
         holder: createBankDto.holder,
         bank_name: createBankDto.bankName,
         cci: createBankDto.cci,
         currency: createBankDto.currency,
-        details: createBankDto.details,
-        situation: createBankDto.situation,
         status: createBankDto.status,
         type_account: createBankDto.typeAccount,
         investor: investor
       });
       await this.bankAccRepository.save(account);
 
+      const wallet = this.walletRepository.create({
+        balance: 0,
+        currency: createBankDto.currency,
+        bank_account: account
+      })
+
+      await this.walletRepository.save(wallet);
+
       return {message:'Bank account created successfully'};
       
     } catch (error) {
+      console.log(error)
       return this.handleErrors(error,'create')
+    }
+  }
+
+  async checkIfBankAccExistsBeforeCreate(token:string, currency:string){
+    try {
+      const investor= await this.investorRepository.findOne({where:{user_id:token}});
+
+      if(!investor){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const account = await this.bankAccRepository.findOne({
+        where:{
+          investor:{
+            user_id:investor.user_id
+          },
+          currency:currency}
+      });
+
+      if(account){
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      return this.handleErrors(error,'checkBankAccBeforeCreate')
     }
   }
 
@@ -88,8 +130,6 @@ export class BankService {
         bank_name: updateBankDto.bankName,
         cci: updateBankDto.cci,
         currency: updateBankDto.currency,
-        details: updateBankDto.details,
-        situation: updateBankDto.situation,
         status: updateBankDto.status,
         type_account: updateBankDto.typeAccount
       });
@@ -134,9 +174,20 @@ export class BankService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      const account = await this.bankAccRepository.findOne({
+      const bankAcc= await this.bankAccRepository.findOne({
+        where:{investor: {
+          user_id: investor.user_id
+          },
+          currency:searchTransactionDto.currency
+      }
+      });
+
+      const account = await this.walletRepository.findOne({
         where:{ 
-          currency:searchTransactionDto.currency, investor: investor,
+          currency:searchTransactionDto.currency, 
+          bank_account: {
+            id: bankAcc.id
+          },
           transactions: {
             type_movement: searchTransactionDto.transactionType? searchTransactionDto.transactionType: null,
             status: searchTransactionDto.status? searchTransactionDto.status: null,
@@ -161,9 +212,8 @@ export class BankService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      const account = await this.bankAccRepository.findOne({
+      const account = await this.walletRepository.findOne({
         where:{ 
-          investor: investor,
           transactions: {
             id: id
           }
@@ -185,6 +235,10 @@ export class BankService {
 
   }
   private handleErrors(error: any,type:string):never{
+
+    if(error instanceof UnauthorizedException){
+      throw new UnauthorizedException(error.message)
+    }
 
     throw new InternalServerErrorException(`Something went wrong at ${type}`)
   }

@@ -14,8 +14,13 @@ export class Transaction{
     @Column('varchar')
     status: string;
 
-    @Column('varchar')
-    amount: string;
+    @Column('decimal',
+        {
+            precision: 19,
+            scale: 4
+        }
+    )
+    amount: number;
 
     @Column('varchar')
     bank_operation_code: string;
@@ -43,6 +48,4 @@ export class Transaction{
     @ManyToOne(() => Wallet, wallet => wallet.transactions)
     wallet: Wallet;
 
-    @ManyToOne( () => BankAccount, bank_account => bank_account.transactions)
-    bank_account: BankAccount;
 }

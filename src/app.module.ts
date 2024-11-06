@@ -32,7 +32,7 @@ import { BankModule } from './bank/bank.module';
           pass:process.env.MAIL_PASS,
         },
         tls:{
-          rejectUnauthorized:false
+          rejectUnauthorized:true
         }
       },      
     }),

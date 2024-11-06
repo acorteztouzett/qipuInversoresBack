@@ -165,6 +165,10 @@ export class AwsService {
     if(error.status===401){
       throw new UnauthorizedException(error.message);
     }
+    if(error instanceof UnauthorizedException){
+      throw new UnauthorizedException(error.message)
+    }
+    
     throw new InternalServerErrorException(`Something went wrong at ${type}`)
   }
 }

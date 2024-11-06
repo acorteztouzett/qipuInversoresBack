@@ -38,6 +38,9 @@ export class AuthService {
     try {
       const {...userData}=createUserDto;
       //  const tokenVerification=customAlphabet(this.alphabet,10)();
+
+      await this.checkInvestorCreation(userData.email,userData.document,userData.country);
+
       const user=this.investorRepository.create({
         country: userData.country,
         names: userData.names,
@@ -61,7 +64,6 @@ export class AuthService {
       if(userData.userType===eTypeUser['Persona Jurídica']){
         const repData = Array.isArray(createInvestorRepresentationDto) ? createInvestorRepresentationDto : [createInvestorRepresentationDto];
         for (let i=0; i< repData.length; i++){
-          console.log(repData[i])
           let investorRepresentation=this.InvestorRepresentationRepository.create({
             names:repData[i].repNames,
             surname:repData[i].repSurname,
@@ -91,11 +93,11 @@ export class AuthService {
       
       // const url= `${process.env.CONFIRMATION_URL}?token=${tokenVerification}` 
       // await this.mailerService.sendMail({
-      //    from:process.env.MAIL_USER,
-      //    to:user.email,
-      //    subject:'Andean Crown SAF ha creado tu cuenta',
-      //    html:templateVerificarAdmin(`${userData.names} ${userData.surname}`,userData.email)
-      //  })
+      //     from:process.env.MAIL_USER,
+      //     to:user.email,
+      //     subject:'Andean Crown SAF ha creado tu cuenta',
+      //     html:templateVerificarAdmin(`${userData.names} ${userData.surname}`,userData.email)
+      //   })
       return {
         message:'User created successfully',
         email:user.email,
@@ -105,6 +107,24 @@ export class AuthService {
     } catch (error) {
       console.log(error)
       this.handleErrors(error,'create')
+    }
+  }
+
+  async checkInvestorCreation(email,document,country){
+    try {
+      const user= await this.investorRepository.findOne({
+        where:{
+          email,document,country
+        }
+      });
+      if(user){
+        throw new UnauthorizedException('User already exists');
+      }
+      return {
+        message:'User available'
+      }
+    } catch (error) {
+      this.handleErrors(error,'checkInvestorCreation');
     }
   }
 
@@ -400,6 +420,13 @@ export class AuthService {
     if(error.status===401){
       throw new UnauthorizedException(error.message);
     }
+    if(error instanceof UnauthorizedException){
+      throw new UnauthorizedException(error.message)
+    }
+    if(error instanceof BadRequestException){
+      throw new BadRequestException(error.message)
+    }
+    
     throw new InternalServerErrorException(`Something went wrong at ${type}`)
   }
 }

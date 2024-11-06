@@ -20,11 +20,5 @@ export class CreateBankDto {
     cci: string;
 
     @IsString()
-    details: string;
-
-    @IsString()
-    situation: string;
-
-    @IsString()
     status: string;
 }

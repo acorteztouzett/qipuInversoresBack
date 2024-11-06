@@ -2,6 +2,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "ty
 import { User } from "./user.entity";
 import { Investor } from "./investor.entity";
 import { Transaction } from "./transaction.entity";
+import { Wallet } from "./wallet.entity";
 
 @Entity('bank_account')
 export class BankAccount{
@@ -26,12 +27,6 @@ export class BankAccount{
     @Column('varchar')
     cci: string;
 
-    @Column('varchar')
-    details: string;
-
-    @Column('varchar')
-    situation: string;
-
     @Column('varchar',
     {default: 'En revisión'}
     )
@@ -40,6 +35,6 @@ export class BankAccount{
     @ManyToOne(() => Investor, user => user.bank_accounts)
     investor: Investor;
 
-    @OneToMany(() => Transaction, transaction => transaction.bank_account)
-    transactions: Transaction[];
+    @OneToMany(() => Wallet, wallet => wallet.bank_account)
+    wallets: Wallet[];
 }
