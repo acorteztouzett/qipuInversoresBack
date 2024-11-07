@@ -266,7 +266,7 @@ export class BankService {
 
       const params = {
         Bucket: process.env.AWSBUCKET,
-        Key: `depositos/${investor.document}`,
+        Key: `depositos/${investor.document}/${req.body.operationCode}`,
         Body: voucher.buffer,
         ContentType: voucher.mimetype,
       };
@@ -290,13 +290,63 @@ export class BankService {
 
       return res.status(200).json({message:'transaction completed successfully'});
     } catch (error) {
-      console.log(error)
       return res.status(400).json({message:'Something went wrong at deposit'});
     }
   }
 
-  async withdraw(token:string){
+  async withdraw(req:Request, res:Response){
+    try {
+      const token = req.headers['token'] as string;
+      const wallet_id = req.headers['wallet_id'] as string;
+      const investor= await this.investorRepository.findOne({where:{user_id:token}});
+      if(!investor){
+        throw new UnauthorizedException('Invalid credentials');
+      }
 
+      const account = await this.bankAccRepository.findOne({
+        where:{investor: {
+          user_id: investor.user_id
+        },
+        wallets:{
+          id: wallet_id
+        }
+      },
+        relations:['wallets']
+      });
+
+      if(!account){
+        throw new UnauthorizedException('Invalid account');
+      }
+
+      const voucher= req.files[0];
+
+      const params = {
+        Bucket: process.env.AWSBUCKET,
+        Key: `retiros/${investor.document}/${req.body.operationCode}`,
+        Body: voucher.buffer,
+        ContentType: voucher.mimetype,
+      };
+
+      const upload = new PutObjectCommand(params);
+      await this.s3.send(upload);
+      const docUrl = `${process.env.AWSURL}${encodeURIComponent(params.Key)}`;
+
+      const deposit= this.transactionRepository.create({
+        amount: req.body.amount,
+        type_movement: req.body.typeMovement,
+        status: req.body.status,
+        currency: account.currency,
+        voucher: docUrl,
+        destination_account:req.body.destinationAccount,
+        bank_operation_code: req.body.operationCode,
+        wallet: account.wallets[0]
+      });
+      await this.transactionRepository.save(deposit);
+
+      return res.status(200).json({message:'transaction completed successfully'});
+    } catch (error) {
+      return res.status(400).json({message:'Something went wrong at deposit'});
+    }
   }
   private handleErrors(error: any,type:string):never{
 

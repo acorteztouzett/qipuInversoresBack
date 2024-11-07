@@ -47,7 +47,8 @@ export class BankController {
   }
 
   @Post('withdraw')
-  withdraw(@Headers('token') token) {
-    return this.bankService.withdraw(token);
+  @UseInterceptors(AnyFilesInterceptor())
+  withdraw(@Req() req:Request, @Res() res: Response) {
+    return this.bankService.withdraw(req,res);
   }
 }
