@@ -8,9 +8,19 @@ import { Investor } from '../auth/entities/investor.entity';
 import { SearchTransactionDto } from './dto/search-transaction.dto';
 import { Transaction } from '../auth/entities/transaction.entity';
 import { Wallet } from '../auth/entities/wallet.entity';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { Request, Response } from 'express';
 
 @Injectable()
 export class BankService {
+  private readonly awsUrl=process.env.AWSURL;
+  private s3 = new S3Client({
+    region:process.env.AWS_S3_REGION,
+    credentials:{
+        accessKeyId:process.env.AWS_S3_ACCESS_KEY_ID,
+        secretAccessKey:process.env.AWS_S3_SECRET_ACCESS_KEY
+    }
+  });
 
   constructor(
     @InjectRepository(BankAccount)
@@ -100,6 +110,7 @@ export class BankService {
 
       const accounts = await this.bankAccRepository.find({
         where: { investor: { user_id: investor.user_id } },
+        relations:['wallets']
       });
       
       return accounts;
@@ -227,8 +238,61 @@ export class BankService {
     }
   }
 
-  async deposit(token:string){
+  async deposit(req:Request, res:Response) {
+    try {
+      const token = req.headers['token'] as string;
+      const wallet_id = req.headers['wallet_id'] as string;
+      const investor= await this.investorRepository.findOne({where:{user_id:token}});
+      if(!investor){
+        throw new UnauthorizedException('Invalid credentials');
+      }
 
+      const account = await this.bankAccRepository.findOne({
+        where:{investor: {
+          user_id: investor.user_id
+        },
+        wallets:{
+          id: wallet_id
+        }
+      },
+        relations:['wallets']
+      });
+
+      if(!account){
+        throw new UnauthorizedException('Invalid account');
+      }
+
+      const voucher= req.files[0];
+
+      const params = {
+        Bucket: process.env.AWSBUCKET,
+        Key: `depositos/${investor.document}`,
+        Body: voucher.buffer,
+        ContentType: voucher.mimetype,
+      };
+
+      const upload = new PutObjectCommand(params);
+      await this.s3.send(upload);
+      const docUrl = `${process.env.AWSURL}${encodeURIComponent(params.Key)}`;
+
+      const deposit= this.transactionRepository.create({
+        amount: req.body.amount,
+        type_movement: req.body.typeMovement,
+        status: req.body.status,
+        currency: account.currency,
+        voucher: docUrl,
+        destination_account:req.body.destinationAccount,
+        charge_account: req.body.chargeAccount,
+        bank_operation_code: req.body.operationCode,
+        wallet: account.wallets[0]
+      });
+      await this.transactionRepository.save(deposit);
+
+      return res.status(200).json({message:'transaction completed successfully'});
+    } catch (error) {
+      console.log(error)
+      return res.status(400).json({message:'Something went wrong at deposit'});
+    }
   }
 
   async withdraw(token:string){

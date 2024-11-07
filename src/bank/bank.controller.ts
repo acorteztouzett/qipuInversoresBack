@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Headers, Head } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Headers, Head, UseInterceptors, Res, Req } from '@nestjs/common';
 import { BankService } from './bank.service';
 import { CreateBankDto } from './dto/create-bank.dto';
 import { UpdateBankDto } from './dto/update-bank.dto';
 import { SearchTransactionDto } from './dto/search-transaction.dto';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { Request, Response } from 'express';
 
 @Controller('bank')
 export class BankController {
@@ -39,8 +41,9 @@ export class BankController {
   }
 
   @Post('deposit')
-  deposit(@Headers('token') token) {
-    return this.bankService.deposit(token);
+  @UseInterceptors(AnyFilesInterceptor())
+  deposit(@Req() req:Request, @Res() res: Response) {
+    return this.bankService.deposit(req,res);
   }
 
   @Post('withdraw')
