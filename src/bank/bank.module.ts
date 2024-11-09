@@ -13,9 +13,10 @@ import { Transaction } from '../auth/entities/transaction.entity';
   controllers: [BankController],
   providers: [BankService],
   imports: [
-    ConfigModule,
     AuthModule,
+    ConfigModule,
     TypeOrmModule.forFeature([Investor,BankAccount,Wallet,Transaction])
-  ]
+  ],
+  exports: [TypeOrmModule]
 })
 export class BankModule {}
