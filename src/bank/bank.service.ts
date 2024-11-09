@@ -318,27 +318,12 @@ export class BankService {
         throw new UnauthorizedException('Invalid account');
       }
 
-      const voucher= req.files[0];
-
-      const params = {
-        Bucket: process.env.AWSBUCKET,
-        Key: `retiros/${investor.document}/${req.body.operationCode}`,
-        Body: voucher.buffer,
-        ContentType: voucher.mimetype,
-      };
-
-      const upload = new PutObjectCommand(params);
-      await this.s3.send(upload);
-      const docUrl = `${this.awsUrl}${encodeURIComponent(params.Key)}`;
-
       const deposit= this.transactionRepository.create({
         amount: req.body.amount,
         type_movement: req.body.typeMovement,
         status: req.body.status,
         currency: account.currency,
-        voucher: docUrl,
         destination_account:req.body.destinationAccount,
-        bank_operation_code: req.body.operationCode,
         wallet: account.wallets[0]
       });
       await this.transactionRepository.save(deposit);
