@@ -30,7 +30,7 @@ export class BankController {
     return this.bankService.remove(token, id);
   }
 
-  @Get('find-transactions')
+  @Post('find-transactions')
   findTransactions(@Headers('token') token, @Body() searchTransactionDto:SearchTransactionDto) {
     return this.bankService.findTransactions(token,searchTransactionDto);
   }

@@ -290,8 +290,6 @@ export class BankService {
 
       return res.status(200).json({message:'transaction completed successfully'});
     } catch (error) {
-      console.log(process.env.AWS_S3_REGION)
-      console.log(error)
       return res.status(400).json({message:'Something went wrong at deposit'});
     }
   }
