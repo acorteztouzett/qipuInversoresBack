@@ -16,6 +16,22 @@ export class Wallet {
     )
     balance: number;
 
+    @Column('decimal',
+        {
+            precision: 19,
+            scale: 4
+        }
+    )
+    reserved_balance: number;
+
+    @Column('decimal',
+        {
+            precision: 19,
+            scale: 4
+        }
+    )
+    invested_balance: number;
+
     @Column('varchar')
     currency: string;
 
