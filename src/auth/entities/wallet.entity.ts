@@ -11,7 +11,7 @@ export class Wallet {
     @Column('decimal',
         {
             precision: 19,
-            scale: 4
+            scale: 2    
         }
     )
     balance: number;
@@ -19,7 +19,7 @@ export class Wallet {
     @Column('decimal',
         {
             precision: 19,
-            scale: 4
+            scale: 2
         }
     )
     reserved_balance: number;
@@ -27,7 +27,7 @@ export class Wallet {
     @Column('decimal',
         {
             precision: 19,
-            scale: 4
+            scale: 2
         }
     )
     invested_balance: number;
