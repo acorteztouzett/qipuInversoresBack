@@ -87,6 +87,9 @@ export class Investor{
     @Column('bool')
     terms_conditions: boolean;
 
+    @Column('varchar')
+    charge: string;
+
     @OneToMany(() =>Company, company=>company.investor)
     company: Company[];
 

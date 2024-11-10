@@ -77,6 +77,10 @@ export class CreateUserDto {
 
     @IsBoolean()
     termsAndConditions: boolean;
+
+    @IsString()
+    @IsOptional()
+    charge: string
 }
 
 export class RegisterDto{

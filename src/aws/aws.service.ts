@@ -101,7 +101,11 @@ export class AwsService {
       const { mimetype, buffer } = files[i];
 
       let existingDoc = await this.documentationRepository.findOne({
-        where: { documentType: type, investor: investor },
+        where: { 
+          documentType: type, investor:{
+            user_id:token
+          }
+         },
       });
       
       const params = {

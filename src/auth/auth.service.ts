@@ -203,6 +203,7 @@ export class AuthService {
           email:userData.email,
           phone:userData.phone,
           address:userData.address,
+          charge:userData.charge,
         });
       }
       
