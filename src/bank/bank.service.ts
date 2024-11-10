@@ -179,6 +179,9 @@ export class BankService {
 
   async findTransactions(token:string, searchTransactionDto: SearchTransactionDto) {
     try {
+      const page = searchTransactionDto.page ?? 1;
+      const limit = searchTransactionDto.limit ?? 10;
+
       const investor= await this.investorRepository.findOne({where:{user_id:token}});
 
       if(!investor){
@@ -190,25 +193,33 @@ export class BankService {
           user_id: investor.user_id
           },
           currency:searchTransactionDto.currency
-      }
+        },
+        relations:['wallets']
       });
 
-      const account = await this.walletRepository.findOne({
+      const [transactions,totalItems] = await this.transactionRepository.findAndCount({
         where:{ 
           currency:searchTransactionDto.currency, 
-          bank_account: {
-            id: bankAcc.id
-          },
-          transactions: {
-            type_movement: searchTransactionDto.transactionType? searchTransactionDto.transactionType: null,
-            status: searchTransactionDto.status? searchTransactionDto.status: null,
-            createdAt: searchTransactionDto.operationDate? new Date(searchTransactionDto.operationDate): null
-          }
+          wallet: bankAcc.wallets[0],
+          type_movement: searchTransactionDto.transactionType? searchTransactionDto.transactionType: null,
+          status: searchTransactionDto.status? searchTransactionDto.status: null,
+          createdAt: searchTransactionDto.operationDate? new Date(searchTransactionDto.operationDate): null
         },
-        relations:['transactions']
+        skip:(page-1)*limit,
+        take:limit
       });
 
-      return account;
+      const totalPages = Math.ceil(totalItems/limit);
+
+      return {
+        transactions,
+        meta:{
+          page,
+          limit,
+          totalItems,
+          totalPages
+        }
+      };
     } catch (error) {
       console.log(error)
       return this.handleErrors(error,'findTransactions')
