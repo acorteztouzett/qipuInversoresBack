@@ -205,6 +205,7 @@ export class BankService {
           status: searchTransactionDto.status? searchTransactionDto.status: null,
           createdAt: searchTransactionDto.operationDate? new Date(searchTransactionDto.operationDate): null
         },
+        order: {createdAt: 'DESC'},
         skip:(page-1)*limit,
         take:limit
       });
