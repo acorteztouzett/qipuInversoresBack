@@ -18,6 +18,7 @@ import { Company } from './entities/company.entity';
 import { EditInvestorRepresentationDto } from './dto/edit-investor_representation.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { templateVerificar, templateVerificarAdmin } from '../utils/emailTemplates';
+import { Wallet } from './entities/wallet.entity';
 
 @Injectable()
 export class AuthService {
@@ -30,6 +31,8 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>,
+    @InjectRepository(Wallet)
+    private readonly walletRepository: Repository<Wallet>,
     private readonly jwtService: JwtService,
     private readonly mailerService: MailerService
   ){}
@@ -163,7 +166,7 @@ export class AuthService {
     }
   }
 
-  async getAccount(token){
+  async getAccount(token:string){
     try {
 
        const userData= await this.investorRepository.findOne({
@@ -171,18 +174,24 @@ export class AuthService {
          relations:['investorRepresentation','company']
        });
 
+       const wallets = await this.walletRepository.find({
+        where: { bank_account: { 
+          investor: { user_id: token }
+        } }
+      });
+
        if(!userData){
          throw new UnauthorizedException('Invalid credentials');
        }
 
-       return userData;
+       return {userData,wallets};
     } catch (error) {
       console.log(error)
       this.handleErrors(error,'getAccount')
     }
   }
 
-  async editAccount(token, createUserDto: CreateUserDto,companyDto:CreateCompanyDto){
+  async editAccount(token:string, createUserDto: CreateUserDto,companyDto:CreateCompanyDto){
     try {
       const {password,...userData}=createUserDto;
       
