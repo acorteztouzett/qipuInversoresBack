@@ -61,6 +61,11 @@ export class AuthController {
     return this.authService.changeStatement(token, statementOfFunds);
   }
 
+  @Get('check-investor')
+  checkInvestor(@Body() {email}) {
+    return this.authService.checkInvestor(email);
+  }
+
   // SERVICIO PRINCIPAL
   @Post('/ruc_verify')
   @UseInterceptors(AnyFilesInterceptor())

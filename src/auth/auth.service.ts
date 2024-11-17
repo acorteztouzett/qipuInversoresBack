@@ -37,6 +37,25 @@ export class AuthService {
     private readonly mailerService: MailerService
   ){}
 
+  async checkInvestor(email:string){
+    try {
+      const user= await this.investorRepository.findOne({
+        where:{
+          email
+        }
+      });
+      if(user){
+        throw new UnauthorizedException('User already exists');
+      }
+      
+      return {
+        message:'User available'
+      }
+    } catch (error) {
+      this.handleErrors(error,'checkInvestor');
+    }
+  }
+
   async create(createUserDto: CreateUserDto, createInvestorRepresentationDto:CreateInvestorRepresentationDto, createCompany: CreateCompanyDto) {
     try {
       const {...userData}=createUserDto;
