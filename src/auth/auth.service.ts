@@ -113,7 +113,7 @@ export class AuthService {
           }
       }
       
-      // const url= `${process.env.CONFIRMATION_URL}?token=${tokenVerification}` 
+      //const url= `${process.env.CONFIRMATION_URL}?token=${tokenVerification}` 
       // await this.mailerService.sendMail({
       //     from:process.env.MAIL_USER,
       //     to:user.email,

@@ -99,10 +99,12 @@ export class Investor{
     @OneToMany(() => MyInvestment, (myInvestment) => myInvestment.investor)
     myInvestments: MyInvestment[];
 
-
     @OneToMany(() => Documentation, documentation => documentation.investor)
     documentation: Documentation[];
 
     @OneToMany(() =>BankAccount, bank_account => bank_account.investor)
     bank_accounts: BankAccount[];
+
+    @OneToMany(() => Wallet, wallet => wallet.investor)
+    wallet: Wallet[];
 }

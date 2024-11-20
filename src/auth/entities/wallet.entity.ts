@@ -35,6 +35,9 @@ export class Wallet {
     @Column('varchar')
     currency: string;
 
+    @ManyToOne(() => Investor, investor => investor.wallet)
+    investor: Investor;
+
     @ManyToOne(() => BankAccount, bankAccount => bankAccount.wallets)
     bank_account: BankAccount;
 

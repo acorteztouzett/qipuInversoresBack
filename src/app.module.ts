@@ -30,9 +30,6 @@ import { BankModule } from './bank/bank.module';
         auth:{
           user:process.env.MAIL_USER,
           pass:process.env.MAIL_PASS,
-        },
-        tls:{
-          rejectUnauthorized:true
         }
       },      
     }),

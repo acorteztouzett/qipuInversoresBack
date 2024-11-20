@@ -35,6 +35,11 @@ export class BankController {
     return this.bankService.findTransactions(token,searchTransactionDto);
   }
 
+  @Get('find-wallets')
+  findWallets(@Headers('token') token) {
+    return this.bankService.findWallets(token);
+  }
+
   @Get('transaction')
   findOneTransaction(@Headers('token') token, @Headers('id') id: string) {
     return this.bankService.findOneTransaction(token, id);

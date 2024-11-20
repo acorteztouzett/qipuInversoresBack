@@ -59,13 +59,26 @@ export class BankService {
       });
       await this.bankAccRepository.save(account);
 
-      const wallet = this.walletRepository.create({
-        balance: 0,
-        currency: createBankDto.currency,
-        bank_account: account
-      })
+      const checkIfWalletExists= await this.walletRepository.findOne({
+        where:{
+          investor:{
+            user_id:investor.user_id
+          },
+          currency:createBankDto.currency
+        }
+      });
 
-      await this.walletRepository.save(wallet);
+      if(checkIfWalletExists){
+        await this.walletRepository.update(checkIfWalletExists.id, {bank_account:account});
+      }else{
+        const wallet = this.walletRepository.create({
+          balance: 0,
+          currency: createBankDto.currency,
+          investor: investor,
+          bank_account: account
+        })
+        await this.walletRepository.save(wallet);
+      }
 
       return {message:'Bank account created successfully'};
       
@@ -169,10 +182,23 @@ export class BankService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
+      await this.walletRepository.update(
+        {
+          investor:{
+            user_id:investor.user_id
+          },
+          bank_account:{
+            id:account.id
+          }
+        },
+          {bank_account:null}
+      );
       await this.bankAccRepository.remove(account);
+
       return {message:'Bank account deleted successfully'}
 
     } catch (error) {
+      console.log(error)
       return this.handleErrors(error,'remove')
     }
   }
@@ -188,19 +214,19 @@ export class BankService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      const bankAcc= await this.bankAccRepository.findOne({
-        where:{investor: {
-          user_id: investor.user_id
+      const wallet= await this.walletRepository.find({
+        where:{
+          investor: {
+            user_id: investor.user_id
           },
-          currency:searchTransactionDto.currency
-        },
-        relations:['wallets']
+          currency: searchTransactionDto.currency
+        }
       });
 
       const [transactions,totalItems] = await this.transactionRepository.findAndCount({
         where:{ 
           currency:searchTransactionDto.currency, 
-          wallet: bankAcc.wallets[0],
+          wallet: wallet,
           type_movement: searchTransactionDto.transactionType? searchTransactionDto.transactionType: null,
           status: searchTransactionDto.status? searchTransactionDto.status: null,
           createdAt: searchTransactionDto.operationDate? new Date(searchTransactionDto.operationDate): null
@@ -347,6 +373,26 @@ export class BankService {
       return res.status(400).json({message:'Something went wrong at deposit'});
     }
   }
+
+  async findWallets(token:string) {
+    try {
+      const investor= await this.investorRepository.findOne({where:{user_id:token}});
+      if(!investor){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const wallets = await this.walletRepository.find({
+        where:{ investor: {
+          user_id: investor.user_id
+        }}
+      });
+
+      return wallets;
+    } catch (error) {
+      return this.handleErrors(error,'findWallets')
+    }
+  }
+
   private handleErrors(error: any,type:string):never{
 
     if(error instanceof UnauthorizedException){
