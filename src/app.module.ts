@@ -26,12 +26,15 @@ import { BankModule } from './bank/bank.module';
       transport:{
         host: process.env.MAIL_HOST,
         port: +process.env.MAIL_PORT,
-        secure:false,
+        secure:true,
         auth:{
           user:process.env.MAIL_USER,
           pass:process.env.MAIL_PASS,
+        },
+        tls:{
+          rejectUnauthorized:false,
         }
-      },      
+      },    
     }),
     AuthModule,
     AwsModule,
