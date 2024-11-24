@@ -90,6 +90,21 @@ export class Investor{
     @Column('varchar')
     charge: string;
 
+    @Column('varchar',{
+        nullable:true,
+    })
+    token: string;
+
+    @Column('timestamp',{
+        nullable:true,
+    })
+    token_expire:Date;
+
+    @Column('varchar',{
+        nullable:true,
+    })
+    delete_request: string;
+
     @OneToMany(() =>Company, company=>company.investor)
     company: Company[];
 

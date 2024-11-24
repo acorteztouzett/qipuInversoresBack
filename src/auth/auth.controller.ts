@@ -66,6 +66,16 @@ export class AuthController {
     return this.authService.checkInvestor(email);
   }
 
+  @Post('delete-request')
+  deleteRequest(@Headers('token') token, @Body() body) {
+    return this.authService.deleteRequest(token, body);
+  }
+
+  @Get('list-delete-requests')
+  listDeleteRequests(@Headers('token') token) {
+    return this.authService.listDeleteRequests(token);
+  }
+
   // SERVICIO PRINCIPAL
   @Post('/ruc_verify')
   @UseInterceptors(AnyFilesInterceptor())

@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Investor } from './entities/investor.entity';
-import { Repository } from 'typeorm';
+import { DataSource, IsNull, Not, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from './dto/login-user.dto';
 import { JwtPayload } from './interfaces/jwt-interface';
@@ -19,9 +19,11 @@ import { EditInvestorRepresentationDto } from './dto/edit-investor_representatio
 import { MailerService } from '@nestjs-modules/mailer';
 import { templateVerificar, templateVerificarAdmin } from '../utils/emailTemplates';
 import { Wallet } from './entities/wallet.entity';
+import { customAlphabet } from 'nanoid';
 
 @Injectable()
 export class AuthService {
+  private alphabet='1234567890abcdefghijklmnopqrstuvwx';
   constructor(
     @InjectRepository(Investor)
     private readonly investorRepository: Repository<Investor>,
@@ -33,6 +35,7 @@ export class AuthService {
     private readonly companyRepository: Repository<Company>,
     @InjectRepository(Wallet)
     private readonly walletRepository: Repository<Wallet>,
+    private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
     private readonly mailerService: MailerService
   ){}
@@ -59,7 +62,6 @@ export class AuthService {
   async create(createUserDto: CreateUserDto, createInvestorRepresentationDto:CreateInvestorRepresentationDto, createCompany: CreateCompanyDto) {
     try {
       const {...userData}=createUserDto;
-      //  const tokenVerification=customAlphabet(this.alphabet,10)();
 
       await this.checkInvestorCreation(userData.email,userData.document,userData.country);
 
@@ -80,6 +82,7 @@ export class AuthService {
         province: userData.province,
         district: userData.district,
         terms_conditions: userData.termsAndConditions,
+        status: 0
       });
       await this.investorRepository.save(user);
       
@@ -112,14 +115,7 @@ export class AuthService {
             await this.companyRepository.save(company);
           }
       }
-      
-      //const url= `${process.env.CONFIRMATION_URL}?token=${tokenVerification}` 
-      // await this.mailerService.sendMail({
-      //     from:process.env.MAIL_USER,
-      //     to:user.email,
-      //     subject:'Andean Crown SAF ha creado tu cuenta',
-      //     html:templateVerificarAdmin(`${userData.names} ${userData.surname}`,userData.email)
-      //   })
+    
       return {
         message:'User created successfully',
         email:user.email,
@@ -129,6 +125,25 @@ export class AuthService {
     } catch (error) {
       console.log(error)
       this.handleErrors(error,'create')
+    }
+  }
+
+  async sendVerificationEmail(names:string,surname:string,email:string){
+    try {
+      const tokenVerification=customAlphabet(this.alphabet,10)();
+
+      await this.mailerService.sendMail({
+        from:process.env.MAIL_USER,
+        to:email,
+        subject:'Andean Crown SAF ha creado tu cuenta',
+        html:templateVerificarAdmin(`${names} ${surname}`,tokenVerification)
+      })
+
+      return tokenVerification;
+      
+    } catch (error) {
+      console.log(error)
+      this.handleErrors(error,'sendVerificationEmail')
     }
   }
 
@@ -397,6 +412,55 @@ export class AuthService {
     }
   }
 
+  async deleteRequest(token, body){
+    try {
+      const investor= await this.investorRepository.findOne({ where: { user_id: token } });
+
+      if(!investor){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+      const emailsNotification= await this.dataSource.query(`SELECT email FROM email_notification`);
+
+      await this.mailerService.sendMail({
+        from:process.env.MAIL_USER,
+        to:emailsNotification.map(i=>i.email),
+        subject:'Solicitud de eliminación',
+        html: `Info: ${investor.document_type} ${investor.document} Nombres: ${investor.names} ${investor.surname} Razon: ${body.request}`
+      });
+
+      await this.investorRepository.update(investor.user_id,{
+        delete_request:body.request,
+      });
+      
+      return {
+        message:'Request sent successfully'
+      };
+    } catch (error) {
+      console.log(error);
+      this.handleErrors(error,'deleteRequest');
+    }
+  }
+
+  async listDeleteRequests(token){
+    try {
+      const investor= await this.investorRepository.findOne({ where: { user_id: token } });
+
+      if(!investor){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const requests= await this.investorRepository.find({
+        select:['user_id','names','surname','document_type','document', 'phone','delete_request'],
+        where:{delete_request:Not(IsNull())}
+      });
+
+      return requests;
+    } catch (error) {
+      console.log(error);
+      this.handleErrors(error,'listDeleteRequests');
+    }
+  }
+  // SERVICIO PRINCIPAL
   async checkRuc(@Req() req: Request,@Res() res: Response){
     const ruc = req.body.ruc;
     
