@@ -36,6 +36,11 @@ export class AuthController {
     return this.authService.editAccount(token, UpdateAuthDto.investor, UpdateAuthDto.company);
   }
 
+  @Post('verify')
+  verifyUser(@Body() body){
+    return this.authService.verifyUser(body);
+  }
+
   @Put('change-password')
   changePassword(@Headers('token') token, @Body() {password}) {
     return this.authService.changePassword(token, password);

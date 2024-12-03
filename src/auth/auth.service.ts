@@ -65,6 +65,8 @@ export class AuthService {
 
       await this.checkInvestorCreation(userData.email,userData.document,userData.country);
 
+      const tokenVerification=customAlphabet(this.alphabet,10)();
+
       const user=this.investorRepository.create({
         country: userData.country,
         names: userData.names,
@@ -82,7 +84,8 @@ export class AuthService {
         province: userData.province,
         district: userData.district,
         terms_conditions: userData.termsAndConditions,
-        status: 0
+        status: 0,
+        token: tokenVerification,
       });
       await this.investorRepository.save(user);
       
@@ -115,6 +118,8 @@ export class AuthService {
             await this.companyRepository.save(company);
           }
       }
+
+      await this.sendVerificationEmail(tokenVerification, userData.names,userData.surname,userData.email);
     
       return {
         message:'User created successfully',
@@ -128,18 +133,47 @@ export class AuthService {
     }
   }
 
-  async sendVerificationEmail(names:string,surname:string,email:string){
+  async verifyUser(body:any){
     try {
-      const tokenVerification=customAlphabet(this.alphabet,10)();
+      const {verifyToken}=body;
+
+      const user=await this.investorRepository.findOne({
+        where:{token:verifyToken}
+      });
+
+      if(!user){
+        throw new UnauthorizedException('Invalid token');
+      }
+      if(user.token!==verifyToken){
+        throw new UnauthorizedException('Invalid token');
+      }
+
+      await this.investorRepository.update(user.user_id,{
+        token:null,
+        status:1
+      });
+
+      return {
+        message:'User verified successfully',
+        email:user.email,
+        token:user.user_id
+      };
+    } catch (error) {
+      this.handleErrors(error,'verifyUser');
+    }
+  }
+
+  async sendVerificationEmail(token:string, names:string,surname:string,email:string){
+    try {
 
       await this.mailerService.sendMail({
         from:process.env.MAIL_USER,
         to:email,
         subject:'Andean Crown SAF ha creado tu cuenta',
-        html:templateVerificarAdmin(`${names} ${surname}`,tokenVerification)
+        html:templateVerificarAdmin(`${names} ${surname}`,token)
       })
 
-      return tokenVerification;
+      return;
       
     } catch (error) {
       console.log(error)
@@ -147,7 +181,7 @@ export class AuthService {
     }
   }
 
-  async checkInvestorCreation(email,document,country){
+  async checkInvestorCreation(email:string ,document,country:string){
     try {
       const user= await this.investorRepository.findOne({
         where:{
