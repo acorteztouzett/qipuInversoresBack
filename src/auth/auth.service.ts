@@ -17,7 +17,7 @@ import { CreateCompanyDto } from './dto/create-company.dto';
 import { Company } from './entities/company.entity';
 import { EditInvestorRepresentationDto } from './dto/edit-investor_representation.dto';
 import { MailerService } from '@nestjs-modules/mailer';
-import { templateVerificar, templateVerificarAdmin } from '../utils/emailTemplates';
+import { templateVerificar, templateVerificarAdmin, templateVerificarCuenta } from '../utils/emailTemplates';
 import { Wallet } from './entities/wallet.entity';
 import { customAlphabet } from 'nanoid';
 
@@ -169,8 +169,8 @@ export class AuthService {
       await this.mailerService.sendMail({
         from:process.env.MAIL_USER,
         to:email,
-        subject:'Andean Crown SAF ha creado tu cuenta',
-        html:templateVerificarAdmin(`${names} ${surname}`,token)
+        subject:`Bienvenido a Qipu Finance, tu código de activación es ${token}`,
+        html:templateVerificarCuenta(`${names} ${surname}`, token, email),
       })
 
       return;
