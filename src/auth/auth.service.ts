@@ -170,6 +170,7 @@ export class AuthService {
         from:process.env.MAIL_USER,
         to:email,
         subject:`Bienvenido a Qipu Finance, tu código de activación es ${token}`,
+        cc:'luis.moralesponce@gmail.com',
         html:templateVerificarCuenta(`${names} ${surname}`, token, email),
       })
 
