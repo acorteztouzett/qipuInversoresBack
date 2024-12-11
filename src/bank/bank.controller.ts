@@ -56,4 +56,22 @@ export class BankController {
   withdraw(@Req() req:Request, @Res() res: Response) {
     return this.bankService.withdraw(req,res);
   }
+
+  //ADMIN
+
+  @Get('find-transactions-admin')
+  findTransactionsAdmin(@Headers('token') token, @Body() searchTransactionDto:SearchTransactionDto) {
+    return this.bankService.findTransactionsAdmin(token, searchTransactionDto);
+  }
+
+  @Put('manage-deposit')
+  manageDeposit(@Headers('token') token, @Headers('id') id: string, @Body() body) {
+    return this.bankService.manageDeposit(token, id, body.status);
+  }
+
+  @Put('manage-withdraw')
+  @UseInterceptors(AnyFilesInterceptor())
+  manageWithdraw(@Req() req:Request, @Res() res: Response) {
+    return this.bankService.manageWithdraw(req,res);
+  }
 }

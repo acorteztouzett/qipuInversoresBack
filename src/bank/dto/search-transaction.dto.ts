@@ -11,6 +11,7 @@ export class SearchTransactionDto {
     @IsString()
     operationDate: string;
 
+    @IsOptional()
     @IsString()
     currency: string;
 
@@ -25,4 +26,8 @@ export class SearchTransactionDto {
     @IsOptional()
     @IsNumber()
     limit: number;
+
+    @IsOptional()
+    @IsString()
+    clientName: string;
 }

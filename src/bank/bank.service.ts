@@ -3,13 +3,14 @@ import { CreateBankDto } from './dto/create-bank.dto';
 import { UpdateBankDto } from './dto/update-bank.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BankAccount } from '../auth/entities/bank_account.entity';
-import { Repository } from 'typeorm';
+import { Like, Raw, Repository } from 'typeorm';
 import { Investor } from '../auth/entities/investor.entity';
 import { SearchTransactionDto } from './dto/search-transaction.dto';
 import { Transaction } from '../auth/entities/transaction.entity';
 import { Wallet } from '../auth/entities/wallet.entity';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Request, Response } from 'express';
+import { User } from '../auth/entities/user.entity';
 
 @Injectable()
 export class BankService {
@@ -31,6 +32,8 @@ export class BankService {
     private readonly transactionRepository: Repository<Transaction>,
     @InjectRepository(Wallet)
     private readonly walletRepository: Repository<Wallet>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ){}
 
   async create(token:string, createBankDto: CreateBankDto) {
@@ -390,6 +393,157 @@ export class BankService {
       return wallets;
     } catch (error) {
       return this.handleErrors(error,'findWallets')
+    }
+  }
+  
+  async findTransactionsAdmin(token:string, searchTransactionDto: SearchTransactionDto) {
+    try {
+      const page = searchTransactionDto.page ?? 1;
+      const limit = searchTransactionDto.limit ?? 10;
+
+      const admin= await this.userRepository.findOne({
+        where:{
+          id:token,
+          role: 0
+        }}
+      );
+
+      if(!admin){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const [transactions, totalItems] = await this.transactionRepository.findAndCount({
+        where: {
+          type_movement: searchTransactionDto.transactionType ? searchTransactionDto.transactionType : null,
+          createdAt: searchTransactionDto.operationDate ? new Date(searchTransactionDto.operationDate) : null,
+          currency: searchTransactionDto.currency ? searchTransactionDto.currency : null,
+          wallet: {
+            investor: {
+              names: searchTransactionDto.clientName ? Raw((alias) => `CONCAT(${alias}, ' ', surname) LIKE :fullName`, {
+                fullName: `%${searchTransactionDto.clientName}%`,
+              }): null,
+            }
+          }
+      },
+      relations: ['wallet', 'wallet.investor'],
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit
+      });
+
+      const transactionsWithNames = transactions.map((transaction) => {
+        const { wallet, ...transactionData } = transaction;
+        return {
+          ...transactionData,
+          clientName: `${wallet.investor.names} ${wallet.investor.surname}`
+        }
+      }
+      );
+
+      const totalPages = Math.ceil(totalItems / limit);
+
+      return {
+      transactions: transactionsWithNames,
+      meta: {
+        page,
+        limit,
+        totalItems,
+        totalPages
+      }
+      };
+    
+    } catch (error) {
+      console.log(error)
+      return this.handleErrors(error,'findTransactionsAdmin')
+    }
+  }
+
+  async manageDeposit(token:string, id: string, status: string) {
+    try {
+      const admin= await this.userRepository.findOne({
+        where:{
+          id:token,
+          role: 0
+        }}
+      );
+      if(!admin){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const transaction = await this.transactionRepository.findOne({
+        where:{id:id},
+        relations:['wallet']
+      });
+
+      if(!transaction){
+        throw new UnauthorizedException('Invalid transaction');
+      }
+
+      await this.transactionRepository.update(transaction.id,{
+        status: status,
+        wallet:{
+          balance: status==='Confirmado'? transaction.wallet.balance+transaction.amount: transaction.wallet.balance
+        }
+      });
+
+      return {message:'Transaction updated successfully'};
+      
+    } catch (error) {
+      console.log(error)
+      return this.handleErrors(error,'manageDeposit')
+    }
+  }
+
+  async manageWithdraw(req:Request, res:Response){
+    try {
+      const token = req.headers['token'] as string;
+      const id = req.headers['id'] as string;
+      const admin= await this.userRepository.findOne({
+        where:{
+          id:token,
+          role: 0
+        }}
+      );
+      if(!admin){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const transaction = await this.transactionRepository.findOne({
+        where:{id:id},
+        relations:['wallet','wallet.investor']
+      });
+
+      if(!transaction){
+        throw new UnauthorizedException('Invalid transaction');
+      }
+
+      const voucher= req.files[0];
+
+      const params = {
+        Bucket: process.env.AWSBUCKET,
+        Key: `retiros/${transaction.wallet.investor.document}/${req.body.operationCode}`,
+        Body: voucher.buffer,
+        ContentType: voucher.mimetype,
+      };
+
+      const upload = new PutObjectCommand(params);
+      await this.s3.send(upload);
+      const docUrl = `${this.awsUrl}${encodeURIComponent(params.Key)}`;
+
+      await this.transactionRepository.update(transaction.id,{
+        status: 'Confirmado',
+        bank_operation_code: req.body.operationCode,
+        voucher: docUrl,
+        wallet:{
+          balance: req.body.status==='Confirmado'? transaction.wallet.balance-transaction.amount: transaction.wallet.balance
+        }
+      });
+
+      return res.status(200).json({message:'Transaction updated successfully'});
+      
+    } catch (error) {
+      console.log(error)
+      return this.handleErrors(error,'manageWithdraw')
     }
   }
 
