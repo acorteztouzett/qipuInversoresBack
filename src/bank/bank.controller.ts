@@ -5,6 +5,7 @@ import { UpdateBankDto } from './dto/update-bank.dto';
 import { SearchTransactionDto } from './dto/search-transaction.dto';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
+import { SearchBankAccountDto } from './dto/search-bank-account.dto';
 
 @Controller('bank')
 export class BankController {
@@ -73,5 +74,15 @@ export class BankController {
   @UseInterceptors(AnyFilesInterceptor())
   manageWithdraw(@Req() req:Request, @Res() res: Response) {
     return this.bankService.manageWithdraw(req,res);
+  }
+
+  @Get('find-accounts-admin')
+  findAccountsAdmin(@Headers('token') token, @Body() searchBankAccountDto:SearchBankAccountDto) {
+    return this.bankService.findAccountsAdmin(token, searchBankAccountDto);
+  }
+
+  @Put('manage-account')
+  manageAccount(@Headers('token') token, @Headers('id') id: string, @Body() body) {
+    return this.bankService.manageAccount(token, id, body.status);
   }
 }

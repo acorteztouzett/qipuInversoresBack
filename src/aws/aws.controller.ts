@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Header, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Header, Req, Res, UploadedFile, UseInterceptors, Headers, Put } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AwsService } from './aws.service';
 import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { SearchDocDto } from './dto/search-doc.dto';
 
 
 @Controller('aws')
@@ -68,6 +69,17 @@ export class AwsController {
     } catch (error) {
       return res.status(400).json({ msg: error.message });
     }
+  }
+
+  //ADMIN
+  @Get('list-docs-admin')
+  async listDocsAdmin(@Headers('token') token, @Body() searchDocDto:SearchDocDto) {
+    return this.awsService.listDocsAdmin(token, searchDocDto);
+  }
+
+  @Put('manage-docs')
+  async manageDocs(@Headers('token') token, @Headers('id') id:string, @Body() body) {
+    return this.awsService.manageDocs(token, id, body.status);
   }
 
 }

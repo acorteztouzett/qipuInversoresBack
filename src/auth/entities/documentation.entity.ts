@@ -1,5 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Investor } from "./investor.entity";
+import { DocsStatus } from '../../aws/interfaces/docs-status.interface';
 
 @Entity('documentation')
 export class Documentation{
@@ -13,9 +14,14 @@ export class Documentation{
     url:string
 
     @Column('varchar',{
-        default:'En revisión'
+        default:DocsStatus["En Revisión"]
     })
-    status:string
+    status: DocsStatus;
+
+    @Column('timestamp',{
+        default:()=> 'CURRENT_TIMESTAMP - INTERVAL 5 HOUR'
+    })
+    createdAt:Date;
 
     @ManyToOne(() =>Investor, investor => investor.documentation)
     investor: Investor;

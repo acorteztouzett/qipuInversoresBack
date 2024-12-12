@@ -35,6 +35,11 @@ export class Wallet {
     @Column('varchar')
     currency: string;
 
+    @Column('timestamp',{
+        default:()=> 'CURRENT_TIMESTAMP - INTERVAL 5 HOUR'
+    })
+    createdAt:Date;
+
     @ManyToOne(() => Investor, investor => investor.wallet)
     investor: Investor;
 

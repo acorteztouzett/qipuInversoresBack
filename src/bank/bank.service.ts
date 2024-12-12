@@ -11,6 +11,7 @@ import { Wallet } from '../auth/entities/wallet.entity';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Request, Response } from 'express';
 import { User } from '../auth/entities/user.entity';
+import { SearchBankAccountDto } from './dto/search-bank-account.dto';
 
 @Injectable()
 export class BankService {
@@ -396,6 +397,8 @@ export class BankService {
     }
   }
   
+  //ADMIN
+
   async findTransactionsAdmin(token:string, searchTransactionDto: SearchTransactionDto) {
     try {
       const page = searchTransactionDto.page ?? 1;
@@ -544,6 +547,90 @@ export class BankService {
     } catch (error) {
       console.log(error)
       return this.handleErrors(error,'manageWithdraw')
+    }
+  }
+
+  async findAccountsAdmin(token:string, searchBankAccountDto:SearchBankAccountDto){
+    try {
+      const admin= await this.userRepository.findOne({
+        where:{
+          id:token,
+          role: 0
+        }}
+      );
+
+      if(!admin){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const page = searchBankAccountDto.page ?? 1;
+      const limit = searchBankAccountDto.limit ?? 10;
+
+      const [accounts, totalItems] = await this.bankAccRepository.findAndCount({
+        where:{
+          createdAt: searchBankAccountDto.registerDate ? new Date(searchBankAccountDto.registerDate) : null,
+          status: searchBankAccountDto.status ? searchBankAccountDto.status : null,
+          investor: {
+            names: searchBankAccountDto.clientName ? Raw((alias) => `CONCAT(${alias}, ' ', surname) LIKE :fullName`, {
+              fullName: `%${searchBankAccountDto.clientName}%`,
+            }): null,
+          }
+        },
+        relations:['investor'],
+        order: {createdAt: 'DESC'},
+        skip: (page - 1) * limit,
+        take: limit
+      });
+
+      const totalPages = Math.ceil(totalItems / limit);
+
+      const accountsWithNames = accounts.map((account) => {
+        const { investor, ...accountData } = account;
+        return {
+          ...accountData,
+          clientName: `${investor.names} ${investor.surname}`
+        }
+      });
+
+      return {
+        accounts: accountsWithNames,
+        meta: {
+          page,
+          limit,
+          totalItems,
+          totalPages
+        }
+      };
+
+    } catch (error) {
+      return this.handleErrors(error,'findAllAdmin')
+    }
+  }
+
+  async manageAccount(token:string, id:string, status:string){
+    try {
+      const admin= await this.userRepository.findOne({
+        where:{
+          id:token,
+          role: 0
+        }}
+      );
+
+      if(!admin){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const account = await this.bankAccRepository.findOne({
+        where:{id:id}
+      });
+
+      if(!account){
+        throw new UnauthorizedException('Invalid account');
+      }
+
+      await this.bankAccRepository.update(account.id,{status:status});
+    } catch (error) {
+      return this.handleErrors(error,'manageAccount')
     }
   }
 

@@ -1,11 +1,13 @@
 import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException, Header } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../auth/entities/user.entity';
-import { Repository } from 'typeorm';
+import { Raw, Repository } from 'typeorm';
 import { DeleteObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Request, Response } from 'express';
 import { Investor } from '../auth/entities/investor.entity';
 import { Documentation } from '../auth/entities/documentation.entity';
+import { SearchDocDto } from './dto/search-doc.dto';
+import { DocsStatus } from './interfaces/docs-status.interface';
 
 @Injectable()
 export class AwsService {
@@ -160,7 +162,85 @@ export class AwsService {
     } catch (err) {
       throw new BadRequestException(`Error fetching files: ${err.message}`);
   }
-}
+  }
+
+  async listDocsAdmin(token: string, searchDocDto: SearchDocDto) {
+    try {
+      const admin= await this.userRepository.findOne({
+        where:{
+          id:token,
+          role: 0
+        }}
+      );
+
+      if(!admin){
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const page = searchDocDto.page ?? 1;
+      const limit = searchDocDto.limit ?? 10;
+
+      const [docs, total] = await this.documentationRepository.findAndCount({
+        where: {
+          createdAt: searchDocDto.registerDate ? new Date(searchDocDto.registerDate) : null,
+          status: searchDocDto.status? searchDocDto.status : null,
+          investor: {
+            names: searchDocDto.clientName ? Raw((alias) => `CONCAT(${alias}, ' ', surname) LIKE :fullName`, {
+              fullName: `%${searchDocDto.clientName}%`,
+            }): null,
+          }
+        },
+        relations: ['investor'],
+        take: limit,
+        skip: (page - 1) * limit,
+      });
+
+      const totalPages = Math.ceil(total / limit);
+
+      const docsWithNames= docs.map((doc)=>{
+          const {investor,...docsData}=doc;
+          return {
+            ...docsData,
+            clientName: `${investor.names} ${investor.surname}`,
+            identifier: `${investor.document_type} ${investor.document}`,
+          }
+        }
+      )
+
+      return {
+        docs: docsWithNames,
+        meta: {
+          page,
+          limit,
+          total,
+          totalPages
+        }
+      };
+
+    } catch (error) {
+      this.handleErrors(error,'listDocsAdmin')
+    }
+  }
+
+  async manageDocs(token: string, id: string, status: DocsStatus) {
+    try {
+      const admin = await this.userRepository.findOne({ where: { id: token, role: 0 } });
+      if (!admin) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const doc = await this.documentationRepository.findOne({ where: { id: id } });
+      if (!doc) {
+        throw new BadRequestException('Document not found');
+      }
+
+      await this.documentationRepository.update(doc.id, { status: status });
+
+      return { msg: 'Document updated successfully' };
+    } catch (error) {
+      this.handleErrors(error,'manageDocs')
+    }
+  }
 
   private handleErrors(error: any,type:string):never{
     if(error.code==='23505'){

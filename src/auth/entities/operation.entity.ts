@@ -18,9 +18,21 @@ export class Operation{
     })
     status: string;
 
+    @Column('timestamp',{
+        default:()=> 'CURRENT_TIMESTAMP - INTERVAL 5 HOUR'
+    })
+    createdAt:Date;
+
+    @Column('bool',{
+        default: false
+    })
+    available_to_invest: boolean;
+
     @OneToMany(() => Billing, billing => billing.operation)
     billing: Billing;
 
     @ManyToOne(() => Payer, payer => payer.operation)
     payer: Payer;
+
+    
 }

@@ -32,6 +32,11 @@ export class BankAccount{
     )
     status: string;
 
+    @Column('timestamp',{
+        default:()=> 'CURRENT_TIMESTAMP - INTERVAL 5 HOUR'
+    })
+    createdAt:Date;
+
     @ManyToOne(() => Investor, user => user.bank_accounts)
     investor: Investor;
 
