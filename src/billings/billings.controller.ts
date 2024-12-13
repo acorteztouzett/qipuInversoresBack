@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Res, Put, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Res, Put, UseInterceptors, UploadedFile, UploadedFiles, Headers } from '@nestjs/common';
 import { BillingsService } from './billings.service';
 import { Request, Response } from 'express';
 import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { SearchOperationsDto } from './dto/search-operations.dto';
+import { EditOperationDto } from './dto/edit-operations.dto';
 
 @Controller('billing')
 export class BillingsController {
@@ -113,5 +115,15 @@ export class BillingsController {
     } catch (error) {
       return res.status(400).json({ msg: error.message });
     }
+  }
+
+  @Get('list-operations-admin')
+  listOperationsAdmin(@Headers('token') token, @Body() searchOperationsDto:SearchOperationsDto) {
+    return this.billingsService.getOperationAdmin(token,searchOperationsDto);
+  }
+
+  @Put('edit-operation-admin')
+  editOperationAdmin(@Headers('token') token,@Headers('id') id, @Body() editOperationDto:EditOperationDto) {
+    return this.billingsService.editOperationAdmin(token, id, editOperationDto);
   }
 }

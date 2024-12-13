@@ -12,6 +12,8 @@ import { Payer } from '../auth/entities/payer.entity';
 import * as xml2js from 'xml2js';
 import dayjs from 'dayjs';
 import decompress from 'decompress';
+import { SearchOperationsDto } from './dto/search-operations.dto';
+import { EditOperationDto } from './dto/edit-operations.dto';
 
 
 @Injectable()
@@ -525,6 +527,111 @@ export class BillingsService {
       },
     );
     return { msg: 'Number of operation successfully updated' };
+  }
+
+  async getOperationAdmin(token: string, searchOperationsDto: SearchOperationsDto) {
+    try {
+      const isAdmin= await this.userRepository.findOne({
+        where:{
+          id:token,
+          role: 0
+        }}
+      );
+
+      if (!isAdmin) {
+        throw new UnauthorizedException('Permission denied');
+      }
+
+      const page = searchOperationsDto.page ?? 1;
+      const limit = searchOperationsDto.limit ?? 10;
+
+      const [operations, totalItems] = await this.operationRepository.findAndCount({
+        where: {
+          createdAt: searchOperationsDto.registerDate ? new Date(searchOperationsDto.registerDate) : null,
+          status: searchOperationsDto.status ? searchOperationsDto.status : null,
+          payer:{
+            full_name: searchOperationsDto.payerName ? Like(`%${searchOperationsDto.payerName}%`) : null
+          },
+          name: searchOperationsDto.clientName ? Like(`%${searchOperationsDto.clientName}%`) : null,
+        },
+        relations: ['billing', 'payer'],
+        skip: (page - 1) * limit,
+        take: limit
+      });
+
+      const totalPages = Math.ceil(totalItems / limit);
+
+      const operationsWithNames = operations.map((operation) => {
+        const { billing, payer, ...operationData } = operation;
+        return {
+          ...operationData,
+          payerName: payer.full_name,
+          totalBills: Array.isArray(billing) ? billing.length : 0,
+          billings: Array.isArray(billing) ? billing.map((bill) => ({
+            id: bill.id,
+            billing_id: bill.billing_id,
+            amount: bill.amount,
+          })) : [],
+          
+      }
+    });
+
+      return {
+        operations: operationsWithNames,
+        meta: {
+          page,
+          limit,
+          totalItems,
+          totalPages
+        }
+      };
+
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async editOperationAdmin(token: string, id:string, editOperationDto:EditOperationDto) {
+    try {
+      const isAdmin= await this.userRepository.findOne({
+        where:{
+          id:token,
+          role: 0
+        }}
+      );
+
+      if (!isAdmin) {
+        throw new UnauthorizedException('Permission denied');
+      }
+
+      const operation = await this.operationRepository.findOne({
+        where: { id },
+        relations: ['payer']
+      });
+
+      if (!operation) {
+        throw new NotFoundException('Operation not found');
+      }
+
+      await this.operationRepository.update({ id }, editOperationDto);
+
+      if(editOperationDto.payerName){
+        const payer = await this.payerRepository.findOne({
+          where: { id: operation.payer.id }
+        });
+
+        if (!payer) {
+          throw new NotFoundException('Payer not found');
+        }
+
+        await this.payerRepository.update({ id: payer.id }, { full_name: editOperationDto.payerName });
+      }
+
+      return { msg: 'Operation updated successfully' };
+      
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 
   private async uploadFileToS3(file: any, key: string): Promise<string> {
