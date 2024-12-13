@@ -565,7 +565,7 @@ export class BillingsService {
         const { billing, payer, ...operationData } = operation;
         return {
           ...operationData,
-          payerName: payer.full_name,
+          payerName: payer.name_debtor,
           totalBills: Array.isArray(billing) ? billing.length : 0,
           billings: Array.isArray(billing) ? billing.map((bill) => ({
             id: bill.id,
@@ -613,7 +613,12 @@ export class BillingsService {
         throw new NotFoundException('Operation not found');
       }
 
-      await this.operationRepository.update({ id }, editOperationDto);
+      await this.operationRepository.update({ id }, {
+        status: editOperationDto.status,
+        n_operation: editOperationDto.operationNumber,
+        name: editOperationDto.clientName,
+        available_to_invest: editOperationDto.availableToInvest
+      });
 
       if(editOperationDto.payerName){
         const payer = await this.payerRepository.findOne({
@@ -624,7 +629,7 @@ export class BillingsService {
           throw new NotFoundException('Payer not found');
         }
 
-        await this.payerRepository.update({ id: payer.id }, { full_name: editOperationDto.payerName });
+        await this.payerRepository.update({ id: payer.id }, { name_debtor: editOperationDto.payerName });
       }
 
       return { msg: 'Operation updated successfully' };
