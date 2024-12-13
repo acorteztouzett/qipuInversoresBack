@@ -122,7 +122,7 @@ export class BillingsController {
     return this.billingsService.getOperationAdmin(token,searchOperationsDto);
   }
 
-  @Put('edit-operation-admin')
+  @Put('manage-operation-admin')
   editOperationAdmin(@Headers('token') token,@Headers('id') id, @Body() editOperationDto:EditOperationDto) {
     return this.billingsService.editOperationAdmin(token, id, editOperationDto);
   }
