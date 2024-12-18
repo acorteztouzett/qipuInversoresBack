@@ -484,9 +484,10 @@ export class BankService {
 
       await this.transactionRepository.update(transaction.id,{
         status: status,
-        wallet:{
-          balance: status==='Confirmado'? transaction.wallet.balance+transaction.amount: transaction.wallet.balance
-        }
+      });
+
+      await this.walletRepository.update(transaction.wallet.id,{
+        balance: status==='Confirmado'? transaction.wallet.balance+transaction.amount: transaction.wallet.balance
       });
 
       return {message:'Transaction updated successfully'};
@@ -537,9 +538,10 @@ export class BankService {
         status: 'Confirmado',
         bank_operation_code: req.body.operationCode,
         voucher: docUrl,
-        wallet:{
-          balance: req.body.status==='Confirmado'? transaction.wallet.balance-transaction.amount: transaction.wallet.balance
-        }
+      });
+
+      await this.walletRepository.update(transaction.wallet.id,{
+        balance: req.body.status==='Confirmado'? transaction.wallet.balance-transaction.amount: transaction.wallet.balance
       });
 
       return res.status(200).json({message:'Transaction updated successfully'});
