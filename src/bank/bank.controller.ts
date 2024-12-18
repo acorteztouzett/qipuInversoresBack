@@ -60,7 +60,7 @@ export class BankController {
 
   //ADMIN
 
-  @Get('find-transactions-admin')
+  @Post('find-transactions-admin')
   findTransactionsAdmin(@Headers('token') token, @Body() searchTransactionDto:SearchTransactionDto) {
     return this.bankService.findTransactionsAdmin(token, searchTransactionDto);
   }
