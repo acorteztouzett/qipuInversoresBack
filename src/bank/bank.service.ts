@@ -486,8 +486,10 @@ export class BankService {
         status: status,
       });
 
+      const operation= Number(transaction.amount) + Number(transaction.wallet.balance);
+
       await this.walletRepository.update(transaction.wallet.id,{
-        balance: status==='Confirmado'? transaction.wallet.balance+transaction.amount: transaction.wallet.balance
+        balance: status==='Confirmado'? operation: transaction.wallet.balance
       });
 
       return {message:'Transaction updated successfully'};
@@ -540,8 +542,10 @@ export class BankService {
         voucher: docUrl,
       });
 
+      const operation= Number(transaction.wallet.balance) - Number(transaction.amount);
+
       await this.walletRepository.update(transaction.wallet.id,{
-        balance: req.body.status==='Confirmado'? transaction.wallet.balance-transaction.amount: transaction.wallet.balance
+        balance: req.body.status==='Confirmado'? operation: transaction.wallet.balance
       });
 
       return res.status(200).json({message:'Transaction updated successfully'});
