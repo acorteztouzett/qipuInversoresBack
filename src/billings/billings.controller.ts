@@ -117,7 +117,7 @@ export class BillingsController {
     }
   }
 
-  @Get('list-operations-admin')
+  @Post('list-operations-admin')
   listOperationsAdmin(@Headers('token') token, @Body() searchOperationsDto:SearchOperationsDto) {
     return this.billingsService.getOperationAdmin(token,searchOperationsDto);
   }

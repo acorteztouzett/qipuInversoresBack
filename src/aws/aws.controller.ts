@@ -72,7 +72,7 @@ export class AwsController {
   }
 
   //ADMIN
-  @Get('list-docs-admin')
+  @Post('list-docs-admin')
   async listDocsAdmin(@Headers('token') token, @Body() searchDocDto:SearchDocDto) {
     return this.awsService.listDocsAdmin(token, searchDocDto);
   }

@@ -76,7 +76,7 @@ export class BankController {
     return this.bankService.manageWithdraw(req,res);
   }
 
-  @Get('find-accounts-admin')
+  @Post('find-accounts-admin')
   findAccountsAdmin(@Headers('token') token, @Body() searchBankAccountDto:SearchBankAccountDto) {
     return this.bankService.findAccountsAdmin(token, searchBankAccountDto);
   }
