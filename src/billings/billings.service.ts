@@ -6,7 +6,7 @@ import { Billing } from 'src/auth/entities/billing.entity';
 import { Operation } from 'src/auth/entities/operation.entity';
 import { Operator } from 'src/auth/entities/operator.entity';
 import { User } from 'src/auth/entities/user.entity';
-import { In, Like, Repository } from 'typeorm';
+import { In, Like, Raw, Repository } from 'typeorm';
 import { readFile, unlink } from 'fs/promises';
 import { Payer } from '../auth/entities/payer.entity';
 import * as xml2js from 'xml2js';
@@ -547,11 +547,12 @@ export class BillingsService {
 
       const [operations, totalItems] = await this.operationRepository.findAndCount({
         where: {
-          createdAt: searchOperationsDto.registerDate ? new Date(searchOperationsDto.registerDate) : null,
+          createdAt: searchOperationsDto.registerDate
+                    ? Raw(alias => `DATE(${alias}) = STR_TO_DATE('${searchOperationsDto.registerDate}', '%d/%m/%Y')`)
+                    : null
+          ,
           status: searchOperationsDto.status ? searchOperationsDto.status : null,
-          payer:{
-            full_name: searchOperationsDto.payerName ? Like(`%${searchOperationsDto.payerName}%`) : null
-          },
+          
           name: searchOperationsDto.clientName ? Like(`%${searchOperationsDto.clientName}%`) : null,
         },
         relations: ['billing', 'payer'],

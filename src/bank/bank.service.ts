@@ -233,7 +233,10 @@ export class BankService {
           wallet: wallet,
           type_movement: searchTransactionDto.transactionType? searchTransactionDto.transactionType: null,
           status: searchTransactionDto.status? searchTransactionDto.status: null,
-          createdAt: searchTransactionDto.operationDate? new Date(searchTransactionDto.operationDate): null
+          createdAt: searchTransactionDto.operationDate
+                    ? Raw(alias => `DATE(${alias}) = STR_TO_DATE('${searchTransactionDto.operationDate}', '%d/%m/%Y')`)
+                    : null
+          ,
         },
         order: {createdAt: 'DESC'},
         skip:(page-1)*limit,
@@ -418,7 +421,10 @@ export class BankService {
       const [transactions, totalItems] = await this.transactionRepository.findAndCount({
         where: {
           type_movement: searchTransactionDto.transactionType ? searchTransactionDto.transactionType : null,
-          createdAt: searchTransactionDto.operationDate ? new Date(searchTransactionDto.operationDate) : null,
+          createdAt: searchTransactionDto.operationDate
+          ? Raw(alias => `DATE(${alias}) = STR_TO_DATE('${searchTransactionDto.operationDate}', '%d/%m/%Y')`)
+          : null
+          ,
           currency: searchTransactionDto.currency ? searchTransactionDto.currency : null,
           wallet: {
             investor: {
@@ -574,7 +580,10 @@ export class BankService {
 
       const [accounts, totalItems] = await this.bankAccRepository.findAndCount({
         where:{
-          createdAt: searchBankAccountDto.registerDate ? new Date(searchBankAccountDto.registerDate) : null,
+          createdAt: searchBankAccountDto.registerDate
+          ? Raw(alias => `DATE(${alias}) = STR_TO_DATE('${searchBankAccountDto.registerDate}', '%d/%m/%Y')`)
+          : null
+          ,
           status: searchBankAccountDto.status ? searchBankAccountDto.status : null,
           investor: {
             names: searchBankAccountDto.clientName ? Raw((alias) => `CONCAT(${alias}, ' ', surname) LIKE :fullName`, {

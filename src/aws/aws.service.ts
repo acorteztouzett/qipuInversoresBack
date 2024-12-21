@@ -182,7 +182,10 @@ export class AwsService {
 
       const [docs, total] = await this.documentationRepository.findAndCount({
         where: {
-          createdAt: searchDocDto.registerDate ? new Date(searchDocDto.registerDate) : null,
+          createdAt: searchDocDto.registerDate
+          ? Raw(alias => `DATE(${alias}) = STR_TO_DATE('${searchDocDto.registerDate}', '%d/%m/%Y')`)
+          : null
+          ,
           status: searchDocDto.status? searchDocDto.status : null,
           investor: {
             names: searchDocDto.clientName ? Raw((alias) => `CONCAT(${alias}, ' ', surname) LIKE :fullName`, {
