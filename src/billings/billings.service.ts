@@ -552,7 +552,9 @@ export class BillingsService {
                     : null
           ,
           status: searchOperationsDto.status ? searchOperationsDto.status : null,
-          
+          payer:{
+            name_debtor: searchOperationsDto.payerName ? Like(`%${searchOperationsDto.payerName}%`) : null
+          },
           name: searchOperationsDto.clientName ? Like(`%${searchOperationsDto.clientName}%`) : null,
         },
         relations: ['billing', 'payer'],
