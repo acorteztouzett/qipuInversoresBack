@@ -12,6 +12,7 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Request, Response } from 'express';
 import { User } from '../auth/entities/user.entity';
 import { SearchBankAccountDto } from './dto/search-bank-account.dto';
+import { TransactionStatus,TransactionType } from '../utils/enums/transactions.enums';
 
 @Injectable()
 export class BankService {
@@ -322,8 +323,8 @@ export class BankService {
 
       const deposit= this.transactionRepository.create({
         amount: req.body.amount,
-        type_movement: req.body.typeMovement,
-        status: req.body.status,
+        type_movement: TransactionType.DEPOSIT,
+        status: TransactionStatus.PENDING,
         currency: account.currency,
         voucher: docUrl,
         destination_account:req.body.destinationAccount,
@@ -364,15 +365,15 @@ export class BankService {
         throw new UnauthorizedException('Invalid account');
       }
 
-      const deposit= this.transactionRepository.create({
+      const withdraw= this.transactionRepository.create({
         amount: req.body.amount,
-        type_movement: req.body.typeMovement,
-        status: req.body.status,
+        type_movement: TransactionType.WITHDRAW,
+        status: TransactionStatus.PENDING,
         currency: account.currency,
         destination_account:req.body.destinationAccount,
         wallet: account.wallets[0]
       });
-      await this.transactionRepository.save(deposit);
+      await this.transactionRepository.save(withdraw);
 
       return res.status(200).json({message:'transaction completed successfully'});
     } catch (error) {
@@ -467,7 +468,7 @@ export class BankService {
     }
   }
 
-  async manageDeposit(token:string, id: string, status: string) {
+  async manageDeposit(token:string, id: string, status: string,rejectReason?:string) {
     try {
       const admin= await this.userRepository.findOne({
         where:{
@@ -490,12 +491,13 @@ export class BankService {
 
       await this.transactionRepository.update(transaction.id,{
         status: status,
+        rejection_reason: status===TransactionStatus.REJECTED? rejectReason: null
       });
 
       const operation= Number(transaction.amount) + Number(transaction.wallet.balance);
 
       await this.walletRepository.update(transaction.wallet.id,{
-        balance: status==='Confirmado'? operation: transaction.wallet.balance
+        balance: status===TransactionStatus.APPROVED? operation: transaction.wallet.balance
       });
 
       return {message:'Transaction updated successfully'};
@@ -529,29 +531,36 @@ export class BankService {
         throw new UnauthorizedException('Invalid transaction');
       }
 
-      const voucher= req.files[0];
+      if(req.body.status===TransactionStatus.APPROVED){
+        const voucher= req.files[0];
 
-      const params = {
-        Bucket: process.env.AWSBUCKET,
-        Key: `retiros/${transaction.wallet.investor.document}/${req.body.operationCode}`,
-        Body: voucher.buffer,
-        ContentType: voucher.mimetype,
-      };
+        const params = {
+          Bucket: process.env.AWSBUCKET,
+          Key: `retiros/${transaction.wallet.investor.document}/${req.body.operationCode}`,
+          Body: voucher.buffer,
+          ContentType: voucher.mimetype,
+        };
 
-      const upload = new PutObjectCommand(params);
-      await this.s3.send(upload);
-      const docUrl = `${this.awsUrl}${encodeURIComponent(params.Key)}`;
+        const upload = new PutObjectCommand(params);
+        await this.s3.send(upload);
+        const docUrl = `${this.awsUrl}${encodeURIComponent(params.Key)}`;
+
+        await this.transactionRepository.update(transaction.id,{
+          status: TransactionStatus.APPROVED,
+          bank_operation_code: req.body.operationCode,
+          voucher: docUrl,
+        });
+      }
 
       await this.transactionRepository.update(transaction.id,{
-        status: 'Confirmado',
-        bank_operation_code: req.body.operationCode,
-        voucher: docUrl,
+        status: TransactionStatus.REJECTED,
+        rejection_reason: req.body.status===TransactionStatus.REJECTED? req.body.rejectReason: null
       });
 
       const operation= Number(transaction.wallet.balance) - Number(transaction.amount);
 
       await this.walletRepository.update(transaction.wallet.id,{
-        balance: req.body.status==='Confirmado'? operation: transaction.wallet.balance
+        balance: req.body.status===TransactionStatus.APPROVED? operation: transaction.wallet.balance
       });
 
       return res.status(200).json({message:'Transaction updated successfully'});

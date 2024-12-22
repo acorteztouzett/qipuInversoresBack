@@ -45,6 +45,9 @@ export class Transaction{
     @Column('varchar')
     charge_account: string;
 
+    @Column('varchar')
+    rejection_reason: string;
+
     @ManyToOne(() => Wallet, wallet => wallet.transactions)
     wallet: Wallet;
 

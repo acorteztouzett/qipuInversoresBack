@@ -67,7 +67,7 @@ export class BankController {
 
   @Put('manage-deposit')
   manageDeposit(@Headers('token') token, @Headers('id') id: string, @Body() body) {
-    return this.bankService.manageDeposit(token, id, body.status);
+    return this.bankService.manageDeposit(token, id, body.status,body.rejectReason);
   }
 
   @Put('manage-withdraw')
