@@ -43,6 +43,9 @@ export class Payer {
     })
     updatedAt:Date;
 
+    @Column('varchar')
+    description: string;
+
     @ManyToOne(() => User, user => user.payer)
     user: User;
 

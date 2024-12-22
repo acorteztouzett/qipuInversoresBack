@@ -19,4 +19,9 @@ export class UtilController {
   async getDistricts(@Param('id') id: string) {
     return await this.utilService.getDistricts(id);
   }
+
+  @Get('list-banks')
+  async getBanks() {
+    return await this.utilService.getBanks();
+  }
 }

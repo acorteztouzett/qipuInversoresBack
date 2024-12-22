@@ -5,8 +5,8 @@ import { Payer } from './payer.entity';
 @Entity('risk')
 export class Risk {
 
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+    @PrimaryGeneratedColumn('increment')
+    id: number;
 
     @Column('varchar')
     name: string;

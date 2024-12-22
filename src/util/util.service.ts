@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUtilDto } from './dto/create-util.dto';
-import { UpdateUtilDto } from './dto/update-util.dto';
-import { EntityManager } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Banks } from '../auth/entities/banks.entity';
+import { GeneralStatus } from '../utils/enums/general-status.enums';
 
 @Injectable()
 export class UtilService {
-  constructor(private readonly entityManager: EntityManager) {}
+  constructor(
+    private readonly entityManager: EntityManager,
+    @InjectRepository(Banks)
+    private readonly banksRepository: Repository<Banks>
+  ) {}
 
   async getDepartments() {
     try {
@@ -28,6 +33,20 @@ export class UtilService {
   async getDistricts(id: string) {
     try {
       const results = await this.entityManager.query('SELECT * FROM districts WHERE province_id = ?', [id]);
+      return results;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async getBanks() {
+    try {
+      const results = await this.banksRepository.find({
+        where: {
+          status: GeneralStatus.ACTIVE
+        },
+        select: ['id', 'name']
+      });
       return results;
     } catch (error) {
       throw new Error(error);

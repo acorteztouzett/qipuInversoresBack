@@ -468,7 +468,7 @@ export class BankService {
     }
   }
 
-  async manageDeposit(token:string, id: string, status: string,rejectReason?:string) {
+  async manageDeposit(token:string, id: string,rejectReason?:string) {
     try {
       const admin= await this.userRepository.findOne({
         where:{
@@ -488,6 +488,8 @@ export class BankService {
       if(!transaction){
         throw new UnauthorizedException('Invalid transaction');
       }
+
+      const status= rejectReason===null? TransactionStatus.REJECTED: TransactionStatus.APPROVED;
 
       await this.transactionRepository.update(transaction.id,{
         status: status,
@@ -531,7 +533,9 @@ export class BankService {
         throw new UnauthorizedException('Invalid transaction');
       }
 
-      if(req.body.status===TransactionStatus.APPROVED){
+      const status= req.body.rejectReason===null? TransactionStatus.REJECTED: TransactionStatus.APPROVED;
+
+      if(status===TransactionStatus.APPROVED){
         const voucher= req.files[0];
 
         const params = {
@@ -546,21 +550,21 @@ export class BankService {
         const docUrl = `${this.awsUrl}${encodeURIComponent(params.Key)}`;
 
         await this.transactionRepository.update(transaction.id,{
-          status: TransactionStatus.APPROVED,
+          status: status,
           bank_operation_code: req.body.operationCode,
           voucher: docUrl,
         });
       }
 
       await this.transactionRepository.update(transaction.id,{
-        status: TransactionStatus.REJECTED,
-        rejection_reason: req.body.status===TransactionStatus.REJECTED? req.body.rejectReason: null
+        status: status,
+        rejection_reason: status===TransactionStatus.REJECTED? req.body.rejectReason: null
       });
 
       const operation= Number(transaction.wallet.balance) - Number(transaction.amount);
 
       await this.walletRepository.update(transaction.wallet.id,{
-        balance: req.body.status===TransactionStatus.APPROVED? operation: transaction.wallet.balance
+        balance: status===TransactionStatus.APPROVED? operation: transaction.wallet.balance
       });
 
       return res.status(200).json({message:'Transaction updated successfully'});
