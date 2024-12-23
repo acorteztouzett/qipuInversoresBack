@@ -48,8 +48,16 @@ export class Operation{
     )
     financed_amount: number;
 
+    @Column('decimal',
+        {
+            precision: 19,
+            scale: 2
+        }
+    )
+    amount_to_finance: number;
+
     @OneToMany(() => Billing, billing => billing.operation)
-    billing: Billing;
+    billing: Billing[];
 
     @ManyToOne(() => Payer, payer => payer.operation)
     payer: Payer;

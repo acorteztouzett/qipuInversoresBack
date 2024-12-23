@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Headers, Head, UseInterceptors, Res, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Headers, Head, UseInterceptors, Res, Req, Header } from '@nestjs/common';
 import { BankService } from './bank.service';
 import { CreateBankDto } from './dto/create-bank.dto';
 import { UpdateBankDto } from './dto/update-bank.dto';
@@ -6,6 +6,7 @@ import { SearchTransactionDto } from './dto/search-transaction.dto';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
 import { SearchBankAccountDto } from './dto/search-bank-account.dto';
+import { CreateInvestDto } from './dto/create-invest.dto';
 
 @Controller('bank')
 export class BankController {
@@ -58,6 +59,11 @@ export class BankController {
     return this.bankService.withdraw(req,res);
   }
 
+  @Post('invest')
+  invest(@Headers('token') token, @Headers('id') id, @Body() createInvestDto:CreateInvestDto) {
+    return this.bankService.invest(token, id, createInvestDto);
+  }
+
   //ADMIN
 
   @Post('find-transactions-admin')
@@ -85,4 +91,5 @@ export class BankController {
   manageAccount(@Headers('token') token, @Headers('id') id: string, @Body() body) {
     return this.bankService.manageAccount(token, id, body.status);
   }
+
 }

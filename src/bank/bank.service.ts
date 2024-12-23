@@ -13,6 +13,8 @@ import { Request, Response } from 'express';
 import { User } from '../auth/entities/user.entity';
 import { SearchBankAccountDto } from './dto/search-bank-account.dto';
 import { TransactionStatus,TransactionType } from '../utils/enums/transactions.enums';
+import { CreateInvestDto } from './dto/create-invest.dto';
+import { Operation } from '../auth/entities/operation.entity';
 
 @Injectable()
 export class BankService {
@@ -36,6 +38,8 @@ export class BankService {
     private readonly walletRepository: Repository<Wallet>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Operation)
+    private readonly operationRepository: Repository<Operation>,
   ){}
 
   async create(token:string, createBankDto: CreateBankDto) {
@@ -401,6 +405,51 @@ export class BankService {
     }
   }
   
+  async invest(token:string, id:string, createInvestDto:CreateInvestDto){
+    try {
+      const investor= await this.investorRepository.findOne({where:{user_id:token}});
+      if(!investor) throw new UnauthorizedException('Invalid credentials');
+
+      const operations= await this.operationRepository.findOne({
+        where:{
+            id:id,
+            available_to_invest: true,
+            progress: Raw(alias => `${alias} < 100`)
+        }
+      });
+      if(!operations) throw new UnauthorizedException('Invalid operation');
+
+      const wallet= await this.walletRepository.findOne({
+        where:{
+          investor:{
+            user_id:investor.user_id
+          },
+          currency: 'Soles'
+        }
+      });
+
+      if(!wallet) throw new UnauthorizedException('Invalid wallet');
+      if(Number(wallet.balance)<Number(createInvestDto.investAmount)) throw new UnauthorizedException('Insufficient funds');
+
+      await this.walletRepository.update(wallet.id,{
+        balance: Number(wallet.balance)-Number(createInvestDto.investAmount),
+        invested_balance: Number(wallet.invested_balance)+Number(createInvestDto.investAmount)
+      });
+
+      const percetageProgress= (Number(operations.financed_amount)+Number(createInvestDto.investAmount))/Number(operations.amount_to_finance)*100;
+
+      await this.operationRepository.update(operations.id,{
+        financed_amount: Number(operations.financed_amount)+Number(createInvestDto.investAmount),
+        progress: percetageProgress
+      });
+
+      return {message:'Investment completed successfully'};
+    } catch (error) {
+      console.log(error)
+      return this.handleErrors(error,'invest')
+    }
+  }
+
   //ADMIN
 
   async findTransactionsAdmin(token:string, searchTransactionDto: SearchTransactionDto) {

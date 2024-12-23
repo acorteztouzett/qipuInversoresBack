@@ -22,4 +22,12 @@ export class EditOperationDto {
     @IsOptional()
     @IsBoolean()
     availableToInvest: boolean;
+
+    @IsOptional()
+    @IsString()
+    auctionCloseDate: Date;
+
+    @IsOptional()
+    @IsNumber()
+    monthlyRate: number;
 }

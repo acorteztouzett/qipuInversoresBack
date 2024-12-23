@@ -621,7 +621,9 @@ export class BillingsService {
         status: editOperationDto.status,
         n_operation: editOperationDto.operationNumber,
         name: editOperationDto.clientName,
-        available_to_invest: editOperationDto.availableToInvest
+        available_to_invest: editOperationDto.availableToInvest,
+        auction_close_date: editOperationDto.auctionCloseDate,
+        monthly_rate: editOperationDto.monthlyRate,
       });
 
       if(editOperationDto.payerName){
@@ -655,16 +657,22 @@ export class BillingsService {
       if (!isAdmin) throw new UnauthorizedException('Permission denied');
 
       const operation = await this.operationRepository.findOne({
-        where: { id:operationId }
+        where: { 
+          id:operationId 
+        },
+        relations: ['billing']
       });
 
       if (!operation) throw new NotFoundException('Operation not found');
+
+      const totalAmount = operation.billing.reduce((acc, bill) => acc + parseInt(bill.amount), 0);
 
       await this.operationRepository.update({ id: operationId }, {
         monthly_rate: createInvestmentDto.monthlyRate,
         auction_close_date: createInvestmentDto.auctionCloseDate,
         progress: 0,
-        available_to_invest: true
+        available_to_invest: true,
+        amount_to_finance: totalAmount
       });
 
       return { msg: 'Investment created successfully' };

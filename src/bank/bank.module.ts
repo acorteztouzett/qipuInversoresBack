@@ -8,6 +8,7 @@ import { Investor } from '../auth/entities/investor.entity';
 import { BankAccount } from '../auth/entities/bank_account.entity';
 import { Wallet } from '../auth/entities/wallet.entity';
 import { Transaction } from '../auth/entities/transaction.entity';
+import { Operation } from '../auth/entities/operation.entity';
 
 @Module({
   controllers: [BankController],
@@ -15,7 +16,7 @@ import { Transaction } from '../auth/entities/transaction.entity';
   imports: [
     AuthModule,
     ConfigModule,
-    TypeOrmModule.forFeature([Investor,BankAccount,Wallet,Transaction])
+    TypeOrmModule.forFeature([Investor,BankAccount,Wallet,Transaction,Operation])
   ],
   exports: [TypeOrmModule]
 })
