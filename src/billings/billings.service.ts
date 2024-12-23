@@ -14,6 +14,7 @@ import dayjs from 'dayjs';
 import decompress from 'decompress';
 import { SearchOperationsDto } from './dto/search-operations.dto';
 import { EditOperationDto } from './dto/edit-operations.dto';
+import { CreateInvestmentDto } from './dto/create-investment.dto';
 
 
 @Injectable()
@@ -638,6 +639,37 @@ export class BillingsService {
       return { msg: 'Operation updated successfully' };
       
     } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async createInvestment(token:string, operationId:string, createInvestmentDto:CreateInvestmentDto){
+    try {
+      const isAdmin= await this.userRepository.findOne({
+        where:{
+          id:token,
+          role: 0
+        }}
+      );
+
+      if (!isAdmin) throw new UnauthorizedException('Permission denied');
+
+      const operation = await this.operationRepository.findOne({
+        where: { id:operationId }
+      });
+
+      if (!operation) throw new NotFoundException('Operation not found');
+
+      await this.operationRepository.update({ id: operationId }, {
+        monthly_rate: createInvestmentDto.monthlyRate,
+        auction_close_date: createInvestmentDto.auctionCloseDate,
+        progress: 0,
+        available_to_invest: true
+      });
+
+      return { msg: 'Investment created successfully' };
+    } catch (error) {
+      console.log(error)
       throw new Error(error.message);
     }
   }

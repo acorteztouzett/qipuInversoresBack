@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { SearchOperationsDto } from './dto/search-operations.dto';
 import { EditOperationDto } from './dto/edit-operations.dto';
+import { CreateInvestmentDto } from './dto/create-investment.dto';
 
 @Controller('billing')
 export class BillingsController {
@@ -125,5 +126,10 @@ export class BillingsController {
   @Put('manage-operation-admin')
   editOperationAdmin(@Headers('token') token,@Headers('id') id, @Body() editOperationDto:EditOperationDto) {
     return this.billingsService.editOperationAdmin(token, id, editOperationDto);
+  }
+
+  @Put('create-investment')
+  createInvestment(@Headers('token') token,@Headers('id') operationId, @Body() createInvestmentDto:CreateInvestmentDto) {
+    return this.billingsService.createInvestment(token,operationId,createInvestmentDto);
   }
 }

@@ -23,10 +23,30 @@ export class Operation{
     })
     createdAt:Date;
 
+    @Column('timestamp')
+    auction_close_date:Date;
+
     @Column('bool',{
         default: false
     })
     available_to_invest: boolean;
+
+    @Column('int')
+    monthly_rate: number;
+
+    @Column('double')
+    progress: number;
+
+    @Column('timestamp')
+    payment_date: Date;
+
+    @Column('decimal',
+        {
+            precision: 19,
+            scale: 2
+        }
+    )
+    financed_amount: number;
 
     @OneToMany(() => Billing, billing => billing.operation)
     billing: Billing;

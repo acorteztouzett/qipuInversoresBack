@@ -24,4 +24,9 @@ export class UtilController {
   async getBanks() {
     return await this.utilService.getBanks();
   }
+
+  @Get('list-risk')
+  async getRisk() {
+    return await this.utilService.getRisk();
+  }
 }
