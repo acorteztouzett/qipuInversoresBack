@@ -1,4 +1,5 @@
-import { IsString } from "class-validator";
+import { IsEnum, IsString } from "class-validator";
+import { Currency } from '../../utils/enums/general-types.enums';
 
 export class CreateBankDto {
     @IsString()
@@ -13,8 +14,8 @@ export class CreateBankDto {
     @IsString()
     accountNumber: string;
 
-    @IsString()
-    currency: string;
+    @IsEnum(Currency)
+    currency: Currency;
 
     @IsString()
     cci: string;

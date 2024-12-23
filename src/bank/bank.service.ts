@@ -424,7 +424,7 @@ export class BankService {
           investor:{
             user_id:investor.user_id
           },
-          currency: 'Soles'
+          currency: createInvestDto.currency
         }
       });
 

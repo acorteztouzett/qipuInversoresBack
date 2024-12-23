@@ -1,4 +1,5 @@
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
+import { Currency } from '../../utils/enums/general-types.enums';
 
 
 export class SearchTransactionDto {
@@ -12,8 +13,8 @@ export class SearchTransactionDto {
     operationDate: string;
 
     @IsOptional()
-    @IsString()
-    currency: string;
+    @IsEnum(Currency)
+    currency: Currency;
 
     @IsOptional()
     @IsString()
