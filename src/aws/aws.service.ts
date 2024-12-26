@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException, Header } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../auth/entities/user.entity';
-import { Raw, Repository } from 'typeorm';
+import { In, Raw, Repository } from 'typeorm';
 import { DeleteObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Request, Response } from 'express';
 import { Investor } from '../auth/entities/investor.entity';
@@ -169,7 +169,7 @@ export class AwsService {
       const admin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: 0
+          role: In([0, 1])
         }}
       );
 
