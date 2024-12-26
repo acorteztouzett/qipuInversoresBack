@@ -6,6 +6,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../auth/entities/user.entity';
 import { Payer } from '../auth/entities/payer.entity';
+import { Operator } from '../auth/entities/operator.entity';
 
 @Module({
   controllers: [PayerController],
@@ -13,7 +14,7 @@ import { Payer } from '../auth/entities/payer.entity';
   imports: [
     ConfigModule,
     AuthModule,
-    TypeOrmModule.forFeature([User,Payer])
+    TypeOrmModule.forFeature([User,Payer,Operator])
   ],
   exports:[TypeOrmModule]
 })

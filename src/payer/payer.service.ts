@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable, Req, Res, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, Req, Res, UnauthorizedException } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../auth/entities/user.entity';
 import { In, Like, Repository } from 'typeorm';
 import { Payer } from '../auth/entities/payer.entity';
+import { Operator } from '../auth/entities/operator.entity';
 
 @Injectable()
 export class PayerService {
@@ -11,7 +12,9 @@ export class PayerService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Payer)
-    private readonly payerRepository: Repository<Payer>
+    private readonly payerRepository: Repository<Payer>,
+    @InjectRepository(Operator)
+    private readonly operatorRepository: Repository<Operator>,
   ) {}
 
   async createContact(@Req() req: Request, @Res() res: Response){
@@ -189,26 +192,28 @@ export class PayerService {
     const token = req.headers['token'] as string;
     const isAdmin = await this.userRepository.findOne({
       where: { id: token, role: 1 },
+      relations: ['operator'],
     });
 
     if (!isAdmin) {
       throw new UnauthorizedException('Permission denied');
     }
-
-    const operator = await this.payerRepository.findOne({
-      where: { id: isAdmin.id },
+    
+    const operator = await this.operatorRepository.findOne({
+      where: { id: isAdmin.operator.id },
     });
 
     if (!operator) {
-      throw new BadRequestException('Operator not found');
+      throw new NotFoundException('Operator not found');
     }
 
     const usersWithContacts = await this.userRepository.find({
       where: {
         operator: { id: operator.id },
+        role: 2,
         company_name: Like(`%${search}%`),
       },
-      relations: ['payers'],
+      relations: ['payer'],
       order: {
         company_name: 'ASC',
         payer: {
