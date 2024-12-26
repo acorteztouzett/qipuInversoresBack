@@ -3,7 +3,7 @@ import { CreateBankDto } from './dto/create-bank.dto';
 import { UpdateBankDto } from './dto/update-bank.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BankAccount } from '../auth/entities/bank_account.entity';
-import { Like, Raw, Repository } from 'typeorm';
+import { In, Like, Raw, Repository } from 'typeorm';
 import { Investor } from '../auth/entities/investor.entity';
 import { SearchTransactionDto } from './dto/search-transaction.dto';
 import { Transaction } from '../auth/entities/transaction.entity';
@@ -460,7 +460,7 @@ export class BankService {
       const admin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: 0
+          role: In([0,1])
         }}
       );
 
@@ -629,7 +629,7 @@ export class BankService {
       const admin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: 0
+          role: In([0,1])
         }}
       );
 
