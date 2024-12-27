@@ -15,6 +15,7 @@ import { SearchBankAccountDto } from './dto/search-bank-account.dto';
 import { TransactionStatus,TransactionType } from '../utils/enums/transactions.enums';
 import { CreateInvestDto } from './dto/create-invest.dto';
 import { Operation } from '../auth/entities/operation.entity';
+import { MyInvestment } from '../auth/entities/my_investments.entity';
 
 @Injectable()
 export class BankService {
@@ -40,6 +41,8 @@ export class BankService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Operation)
     private readonly operationRepository: Repository<Operation>,
+    @InjectRepository(MyInvestment)
+    private readonly myInvestmentRepository: Repository<MyInvestment>
   ){}
 
   async create(token:string, createBankDto: CreateBankDto) {
@@ -443,10 +446,34 @@ export class BankService {
         progress: percetageProgress
       });
 
+      const myInvestment = this.myInvestmentRepository.create({
+        investment: operations,
+        investor: investor,
+      });
+      await this.myInvestmentRepository.save(myInvestment);
+      
       return {message:'Investment completed successfully'};
     } catch (error) {
       console.log(error)
       return this.handleErrors(error,'invest')
+    }
+  }
+
+  async findMyInvestments(token:string){
+    try {
+      const investor= await this.investorRepository.findOne({where:{user_id:token}});
+      if(!investor) throw new UnauthorizedException('Invalid credentials');
+
+      const myInvestments = await this.myInvestmentRepository.find({
+        where:{ investor: {
+          user_id: investor.user_id
+        }},
+        relations:['investment']
+      });
+
+      return myInvestments;
+    } catch (error) {
+      return this.handleErrors(error,'findMyInvestments')
     }
   }
 

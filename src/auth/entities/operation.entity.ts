@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm"
 import { Billing } from "./billing.entity";
 import { Payer } from "./payer.entity";
+import { MyInvestment } from "./my_investments.entity";
 
 @Entity('operations')
 export class Operation{
@@ -62,5 +63,7 @@ export class Operation{
     @ManyToOne(() => Payer, payer => payer.operation)
     payer: Payer;
 
+    @OneToMany(() =>MyInvestment, myInvestment => myInvestment.investment)
+    myInvestments: MyInvestment[];
     
 }
