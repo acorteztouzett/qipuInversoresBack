@@ -600,7 +600,7 @@ export class BillingsService {
       const isAdmin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: 0
+          role: In([0,1])
         }}
       );
 
@@ -650,7 +650,7 @@ export class BillingsService {
       const isAdmin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: 0
+          role: In([0,1])
         }}
       );
 

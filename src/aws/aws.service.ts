@@ -227,7 +227,12 @@ export class AwsService {
 
   async manageDocs(token: string, id: string, status: DocsStatus) {
     try {
-      const admin = await this.userRepository.findOne({ where: { id: token, role: 0 } });
+      const admin= await this.userRepository.findOne({
+        where:{
+          id:token,
+          role: In([0, 1])
+        }}
+      );
       if (!admin) {
         throw new UnauthorizedException('Invalid credentials');
       }

@@ -716,7 +716,7 @@ export class BankService {
       const admin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: 0
+          role: In([0,1])
         }}
       );
 
