@@ -446,6 +446,15 @@ export class BankService {
         progress: percetageProgress
       });
 
+      const transaction= this.transactionRepository.create({
+        amount: createInvestDto.investAmount,
+        type_movement: TransactionType.INVEST,
+        status: TransactionStatus.APPROVED,
+        currency: createInvestDto.currency,
+        wallet: wallet
+      });
+      await this.transactionRepository.save(transaction);
+
       const myInvestment = this.myInvestmentRepository.create({
         investment: operations,
         investor: investor,

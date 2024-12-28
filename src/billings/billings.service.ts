@@ -698,8 +698,24 @@ export class BillingsService {
 
     } catch (error) {
       throw new Error(error.message);
+    } 
   }
-}
+  
+  async getOportunity(id:string) {
+    try {
+      const operation = await this.operationRepository.findOne({
+        where: { id },
+        relations: ['payer','payer.risk'],
+      });
+
+      if (!operation) throw new NotFoundException('Operation not found');
+
+      return operation;
+
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
 
   private async uploadFileToS3(file: any, key: string): Promise<string> {
     const {mimetype,buffer} = file;

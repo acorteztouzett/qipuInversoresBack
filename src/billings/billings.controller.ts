@@ -139,4 +139,9 @@ export class BillingsController {
     return this.billingsService.getOportunities();
   }
 
+  @Get('oportunity')
+  getOportunity(@Headers('id') id) {
+    return this.billingsService.getOportunity(id);
+  }
+
 }

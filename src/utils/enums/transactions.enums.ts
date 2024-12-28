@@ -8,4 +8,5 @@ export enum TransactionStatus {
 export enum TransactionType {
     DEPOSIT = 'Deposito',
     WITHDRAW = 'Retiro',
+    INVEST = 'Inversión',
 }
