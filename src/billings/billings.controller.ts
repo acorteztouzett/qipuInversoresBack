@@ -133,4 +133,10 @@ export class BillingsController {
   createInvestment(@Headers('token') token,@Headers('id') operationId, @Body() createInvestmentDto:CreateInvestmentDto) {
     return this.billingsService.createInvestment(token,operationId,createInvestmentDto);
   }
+
+  @Post('list-oportunities')
+  listOportunities() {
+    return this.billingsService.getOportunities();
+  }
+
 }

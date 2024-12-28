@@ -682,6 +682,35 @@ export class BillingsService {
     }
   }
 
+  async getOportunities() {
+    try {
+      const operations = await this.operationRepository.find({
+        where: {
+          available_to_invest: true,
+        },
+        relations: ['payer','payer.risk'],
+        order: {
+          createdAt: 'DESC'
+        }
+      });
+
+      const operationsWithNames = operations.map((operation) => {
+        const {payer, ...operationData } = operation;
+        return {
+          ...operationData,
+          payerName: payer.name_debtor,
+          risk: payer.risk.name,
+          
+      }
+    });
+
+      return operationsWithNames;
+
+    } catch (error) {
+      throw new Error(error.message);
+  }
+}
+
   private async uploadFileToS3(file: any, key: string): Promise<string> {
     const {mimetype,buffer} = file;
     
