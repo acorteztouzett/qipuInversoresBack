@@ -694,17 +694,7 @@ export class BillingsService {
         }
       });
 
-      const operationsWithNames = operations.map((operation) => {
-        const {payer, ...operationData } = operation;
-        return {
-          ...operationData,
-          payerName: payer.name_debtor,
-          risk: payer.risk.name,
-          
-      }
-    });
-
-      return operationsWithNames;
+      return operations;
 
     } catch (error) {
       throw new Error(error.message);
