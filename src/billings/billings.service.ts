@@ -389,7 +389,7 @@ export class BillingsService {
       const rucClient = parsedXml.Invoice['cac:AccountingCustomerParty'][0]['cac:Party'][0]['cac:PartyIdentification'][0]['cbc:ID'][0]['_'];
       const typeCoin = parsedXml.Invoice['cac:InvoiceLine'][0]['cac:Price'][0]['cbc:PriceAmount'][0]['$'].currencyID === 'PEN' ? 'S/' : '$';
       const amount = typeCoin + parsedXml.Invoice['cac:InvoiceLine'][0]['cac:PricingReference'][0]['cac:AlternativeConditionPrice'][0]['cbc:PriceAmount'][0]['_'];
-      const netAmount = typeCoin + parsedXml.Invoice['cac:InvoiceLine'][0]['cbc:LineExtensionAmount'][0]['_'];
+      const netAmount = parseFloat(parsedXml.Invoice['cac:InvoiceLine'][0]['cbc:LineExtensionAmount'][0]['_']);
       const detraction = typeCoin + parsedXml.Invoice['cac:InvoiceLine'][0]['cac:TaxTotal'][0]['cbc:TaxAmount'][0]['_'];
       const dateEmission = dayjs(parsedXml.Invoice['cbc:IssueDate'][0]).format('DD/MM/YYYY');
 
@@ -665,7 +665,7 @@ export class BillingsService {
 
       if (!operation) throw new NotFoundException('Operation not found');
 
-      const totalAmount = operation.billing.reduce((acc, bill) => acc + parseInt(bill.net_amount), 0);
+      const totalAmount = operation.billing.reduce((acc, bill) => acc + bill.net_amount, 0);
 
       await this.operationRepository.update({ id: operationId }, {
         monthly_rate: createInvestmentDto.monthlyRate,

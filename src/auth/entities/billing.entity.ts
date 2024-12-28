@@ -11,14 +11,27 @@ export class Billing {
     @Column('varchar')
     billing_id: string;
 
-    @Column('varchar')
+    @Column('decimal',
+        {
+            precision: 19,
+            scale: 2
+        }
+    )
     amount: string;
 
     @Column('varchar')
     detraction: string;
 
+    @Column('decimal',
+        {
+            precision: 19,
+            scale: 2
+        }
+    )
+    net_amount: number;
+
     @Column('varchar')
-    net_amount: string;
+    currency: string;
 
     @Column('varchar')
     account: string;

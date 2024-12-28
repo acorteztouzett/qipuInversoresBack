@@ -32,7 +32,7 @@ export class Operation{
     })
     available_to_invest: boolean;
 
-    @Column('int')
+    @Column('float')
     monthly_rate: number;
 
     @Column('double')
