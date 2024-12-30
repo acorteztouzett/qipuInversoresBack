@@ -381,8 +381,11 @@ export class UserService {
         throw new HttpException('Operator not found', HttpStatus.NOT_FOUND);
       }
 
-      await this.userRepository.delete({ id: operator.id });
       await this.operatorRepository.delete({ id: operator.operator.id });
+      await this.userRepository.delete({ 
+        id: operator.id,
+        role: 1,
+       });
 
       return { msg: 'deleted successfully' };
     }
