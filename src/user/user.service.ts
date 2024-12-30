@@ -290,7 +290,7 @@ export class UserService {
         req.body.password = hashSync(req.body.password,10);
         req.body.status = 0;
 
-        const userData = await this.userRepository.create(req.body);
+        const userData = this.userRepository.create(req.body);
         await this.userRepository.save(userData);
 
         const user= await this.userRepository.findOne({where:{email:req.body.email}})
@@ -302,6 +302,8 @@ export class UserService {
             email: req.body.email,
             });
             await this.operatorRepository.save(operator);
+
+            await this.userRepository.update(user.id, { operator: operator });
 
             const template = templateVerificarAdmin(user.name, user.email);
             await this.mailerService.sendMail({
