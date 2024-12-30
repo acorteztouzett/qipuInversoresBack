@@ -46,6 +46,18 @@ export class Payer {
     @Column('varchar')
     description: string;
 
+    @Column('varchar')
+    sector: string;
+
+    @Column('varchar')
+    field: string;
+
+    @Column('varchar')
+    historic_arrear: string;
+
+    @Column('varchar')
+    six_month_arrear: string;
+
     @ManyToOne(() => User, user => user.payer)
     user: User;
 

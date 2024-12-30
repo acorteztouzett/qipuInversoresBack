@@ -229,7 +229,7 @@ export class UserService {
         }
 
         return operadores.map((operator) => ({
-          id: isAdmin.id,
+          id: operator.id,
           name: operator.name,
           email: operator.email,
           users: operator.user
