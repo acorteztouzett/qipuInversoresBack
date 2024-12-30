@@ -375,19 +375,24 @@ export class UserService {
         throw new HttpException('Permission denied', HttpStatus.UNAUTHORIZED);
       }
 
-      const operator = await this.userRepository.findOne({
-         where: { id: req.body.id, role: 1 },
+      const userOperator = await this.userRepository.findOne({
+         where: { 
+          operator:{
+            id: req.body.id
+          },
+          role: 1 
+        },
          relations: ['operator'],
       });
-      if (!operator) {
+      if (!userOperator) {
         throw new HttpException('Operator not found', HttpStatus.NOT_FOUND);
       }
 
-      await this.operatorRepository.delete({ id: operator.operator.id });
       await this.userRepository.delete({ 
-        id: operator.id,
+        id: userOperator.id,
         role: 1,
        });
+      await this.operatorRepository.delete({ id: userOperator.operator.id });
 
       return { msg: 'deleted successfully' };
     }
