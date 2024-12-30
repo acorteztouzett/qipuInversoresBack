@@ -91,7 +91,7 @@ export class UserService {
             validity: item.validity,
             caducity: caducity,
             updatedAt: item.updatedAt,
-            operator_name: item.operator.name,
+            operator_name: item.operator? item.operator.name : '',
             bank_acc: item.bank_acc,
             bank_name: item.bank_name,
           };

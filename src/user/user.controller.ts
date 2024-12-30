@@ -24,7 +24,8 @@ export class UserController {
       const response= await this.userService.mostrarUsers(req,res);
       res.status(200).json(response);
     } catch (error) {
-      res.status(400).json({ msg: error});  
+      console.log(error);
+      res.status(400).json({ msg: error.message});  
     }
   }
 
