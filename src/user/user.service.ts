@@ -47,23 +47,30 @@ export class UserService {
           throw new HttpException('Permission denied', HttpStatus.UNAUTHORIZED);
         }
     
-        const { from, to, search } = req.query;
+        const { search,role,page=1,limit=10 } = req.body;
+
+        
+      
         const today = dayjs().format('YYYY-MM-DD');
         
-        const users = await this.userRepository.find({
+        const [users,totalItems] = await this.userRepository.findAndCount({
           order: {'company_name': 'ASC'},
           relations: ['operator'],
           where: {
-            
+            role: role,
             company_name: Like(`%${search}%`)
           },
+          skip: (page - 1) * limit,
+          take: limit
         });
     
         if (!users.length) {
           throw new HttpException('Users not found', HttpStatus.NOT_FOUND);
         }
+
+        const totalPages = Math.ceil(totalItems / limit);
     
-        return users.map((item) => {
+        const userData= users.map((item) => {
           const days = dayjs(item.validity).diff(dayjs(today), 'day');
           let caducity:any = false;
           if (days > 0 && days <= 5) {
@@ -96,6 +103,16 @@ export class UserService {
             bank_name: item.bank_name,
           };
         });
+
+        return {
+          users: userData,
+          meta: {
+            page,
+            limit,
+            totalItems,
+            totalPages
+          }
+        };
     }
 
     async mostrarUser(@Req() req, @Res() res){
@@ -341,7 +358,7 @@ export class UserService {
 
         const operator=await this.operatorRepository.findOne({where:{id:req.body.id}})
         await this.userRepository.update(
-            {id:req.body.userId},
+            {id:req.body.idUser},
             {operator:operator}
         ) 
         return res.status(200).json({msg:'updated successfully'})

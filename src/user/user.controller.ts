@@ -19,6 +19,7 @@ export class UserController {
   }
 
   @Post('listusers')
+  @UseInterceptors(AnyFilesInterceptor())
   async listUsers(@Req() req: Request, @Res() res: Response) {
     try {
       const response= await this.userService.mostrarUsers(req,res);
@@ -65,6 +66,7 @@ export class UserController {
   }
 
   @Post('login')
+  @UseInterceptors(AnyFilesInterceptor())
   async login(@Req() req: Request, @Res() res: Response) {
     return this.userService.loginUser(req,res);
   }
@@ -81,6 +83,7 @@ export class UserController {
   }
 
   @Put('asign-users')
+  @UseInterceptors(AnyFilesInterceptor())
   async asignUsers(@Req() req: Request, @Res() res: Response) {
     return this.userService.asignarOperador(req,res);
   }
@@ -119,11 +122,13 @@ export class UserController {
   }
 
   @Post('sign-in')
+  @UseInterceptors(AnyFilesInterceptor())
   async signIn(@Req() req: Request, @Res() res: Response) {
     return this.userService.crearUser(req,res);
   }
 
   @Post('sign-in-operator')
+  @UseInterceptors(AnyFilesInterceptor())
   async signInOperator(@Req() req: Request, @Res() res: Response) {
     try {
       const response=await this.userService.crearUserOperator(req,res);
@@ -134,11 +139,13 @@ export class UserController {
   }
 
   @Post('forgot-password')
+  @UseInterceptors(AnyFilesInterceptor())
   async forgotPassword(@Req() req: Request, @Res() res: Response) {
     return this.userService.forgotPassword(req,res);
   }
 
   @Post('reset-password')
+  @UseInterceptors(AnyFilesInterceptor())
   async resetPassword(@Req() req: Request, @Res() res: Response) {
     return this.userService.resetPassword(req,res);
   }
@@ -150,6 +157,7 @@ export class UserController {
   }
 
   @Put('editpass')
+  @UseInterceptors(AnyFilesInterceptor())
   async editPass(@Req() req: Request, @Res() res: Response) {
     return this.userService.editPassword(req,res);
   }
