@@ -52,9 +52,6 @@ export class Billing {
     n_days: string;
     
     @Column('varchar')
-    monthly_fee: string;
-
-    @Column('varchar')
     commission: string;
 
     @Column('varchar')
