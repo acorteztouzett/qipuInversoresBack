@@ -11,6 +11,7 @@ export class BillingsController {
   constructor(private readonly billingsService: BillingsService) {}
 
   @Get('list-operator')
+  @UseInterceptors(AnyFilesInterceptor())
   async listOperator(@Req() req: Request,@Res() res: Response) {
     try {
       const response = await this.billingsService.getInfoOperator(req, res);
@@ -22,6 +23,7 @@ export class BillingsController {
   }
 
   @Get('list-admin')
+  @UseInterceptors(AnyFilesInterceptor())
   async listAdmin(@Req() req: Request,@Res() res: Response) {
     try {
       const response = await this.billingsService.getInfoAdmin(req, res);
@@ -32,6 +34,7 @@ export class BillingsController {
   }
 
   @Get('list')
+  @UseInterceptors(AnyFilesInterceptor())
   async list(@Req() req: Request,@Res() res: Response) {
     try {
       const response = await this.billingsService.getInfo(req, res);
@@ -42,6 +45,7 @@ export class BillingsController {
   }
 
   @Get('list-operations')
+  @UseInterceptors(AnyFilesInterceptor())
   async listOperations(@Req() req: Request,@Res() res: Response) {
     try {
       const response = await this.billingsService.getOperation(req, res);
@@ -52,11 +56,13 @@ export class BillingsController {
   }
 
   @Post('info-user')
+  @UseInterceptors(AnyFilesInterceptor())
   async infoUser(@Req() req: Request,@Res() res: Response) {
     try {
       const response = await this.billingsService.getInfoUserAdmin(req, res);
       return res.status(200).json(response);
     } catch (error) {
+
       return res.status(400).json({ msg: error.message });
     }
   }

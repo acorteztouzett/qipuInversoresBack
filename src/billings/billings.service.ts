@@ -302,14 +302,14 @@ export class BillingsService {
       throw new NotFoundException('Client not found');
     }
   
-    const pagador = await this.payerRepository.findOne({ where: { full_name: req.body.name } });
-  
+    const pagador = await this.payerRepository.findOne({ where: { id: req.body.payer_id } });
     if (!pagador) {
       throw new NotFoundException('Debtors not found');
     }
-  
+    
     const bills = await this.billingRepository.find({
       where: { user: { id: user.id }, payer: { id: pagador.id } },
+      relations: ['payer','user']
     });
   
     if (!bills || bills.length === 0) {
