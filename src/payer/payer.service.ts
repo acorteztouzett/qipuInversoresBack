@@ -237,6 +237,11 @@ export class PayerService {
         status: contact.status,
         createdAt: contact.createdAt,
         updatedAt: contact.updatedAt,
+        description: contact.description,
+        sector: contact.sector,
+        field: contact.field,
+        historic_arrear: contact.historic_arrear,
+        six_months_arrear: contact.six_month_arrear,
       })),
     }));
 
@@ -280,6 +285,11 @@ export class PayerService {
         status: contact.status,
         createdAt: contact.createdAt,
         updatedAt: contact.updatedAt,
+        description: contact.description,
+        sector: contact.sector,
+        field: contact.field,
+        historic_arrear: contact.historic_arrear,
+        six_months_arrear: contact.six_month_arrear,
       })),
     }));
 

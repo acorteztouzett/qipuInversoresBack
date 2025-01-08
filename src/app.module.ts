@@ -21,6 +21,8 @@ import { BankModule } from './bank/bank.module';
       password: process.env.DB_PASSWORD,
       autoLoadEntities: true,
       synchronize: true,
+      logger: 'advanced-console',
+      logging: true,
     }),
     MailerModule.forRoot({
       transport:{
