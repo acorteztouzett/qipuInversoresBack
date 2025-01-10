@@ -19,7 +19,9 @@ export class Payer {
     @Column('varchar')
     email: string;
 
-    @Column('varchar')
+    @Column('varchar',{
+        nullable: true
+    })
     email_extra: string;
 
     @Column('varchar')
@@ -49,13 +51,19 @@ export class Payer {
     @Column('varchar')
     sector: string;
 
-    @Column('varchar')
+    @Column('varchar',{
+        nullable: true
+    })
     field: string;
 
-    @Column('varchar')
+    @Column('varchar',{
+        nullable: true
+    })
     historic_arrear: string;
 
-    @Column('varchar')
+    @Column('varchar',{
+        nullable: true
+    })
     six_month_arrear: string;
 
     @ManyToOne(() => User, user => user.payer)
