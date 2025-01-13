@@ -150,7 +150,7 @@ export class PayerService {
   async modificarContacto(@Req() req: Request, @Res() res: Response) {
     const token = req.headers['token'] as string;
     const isAdmin = await this.userRepository.findOne({
-      where: { id: token, role: In([0, 1]) },
+      where: { id: token, role: In([0, 1, 2]) },
     });
 
     if (!isAdmin) {
