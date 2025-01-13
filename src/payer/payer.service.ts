@@ -226,23 +226,7 @@ export class PayerService {
       id: user.id,
       name: user.name,
       company_name: user.company_name,
-      contacts: user.payer.map(contact => ({
-        id: contact.id,
-        ruc: contact.ruc,
-        full_name: contact.full_name,
-        email: contact.email,
-        email_extra: contact.email_extra,
-        phone: contact.phone,
-        name_debt: contact.name_debtor,
-        status: contact.status,
-        createdAt: contact.createdAt,
-        updatedAt: contact.updatedAt,
-        description: contact.description,
-        sector: contact.sector,
-        field: contact.field,
-        historic_arrear: contact.historic_arrear,
-        six_months_arrear: contact.six_month_arrear,
-      })),
+      contacts: user.payer
     }));
 
     return userContacts;
@@ -274,23 +258,7 @@ export class PayerService {
       id: user.id,
       name: user.name,
       company_name: user.company_name,
-      contacts: user.payer.map(contact => ({
-        id: contact.id,
-        ruc: contact.ruc,
-        full_name: contact.full_name,
-        email: contact.email,
-        email_extra: contact.email_extra,
-        phone: contact.phone,
-        name_debt: contact.name_debtor,
-        status: contact.status,
-        createdAt: contact.createdAt,
-        updatedAt: contact.updatedAt,
-        description: contact.description,
-        sector: contact.sector,
-        field: contact.field,
-        historic_arrear: contact.historic_arrear,
-        six_months_arrear: contact.six_month_arrear,
-      })),
+      contacts: user.payer
     }));
 
     return userContacts;

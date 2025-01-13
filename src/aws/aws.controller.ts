@@ -34,7 +34,7 @@ export class AwsController {
     @Param('type') type: string
   ) {
     try {
-      const allowedTypes= ['ruc','dni','rtt','repre','info','otros'];
+      const allowedTypes= ['ruc','dni','rtt','repre','info','otros','formaccount','copylittlebusiness'];
       if(!allowedTypes.includes(type)){
         return res.status(400).json({ msg: 'Invalid type' });
       }

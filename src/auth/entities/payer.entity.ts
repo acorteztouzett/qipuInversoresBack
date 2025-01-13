@@ -66,6 +66,56 @@ export class Payer {
     })
     six_month_arrear: string;
 
+    @Column('varchar',{
+        nullable: true
+    })
+    area:   string;
+
+    @Column('varchar',{
+        nullable: true
+    })
+    charge: string;
+
+    @Column('varchar',{
+        nullable: true
+    })
+    phone_d: string;
+
+    @Column('varchar',{
+        nullable: true
+    })
+    area_d: string;
+
+    @Column('varchar',{
+        nullable: true
+    })
+    charge_d: string;
+
+    @Column('varchar',{
+        nullable: true
+    })
+    email_d: string;
+
+    @Column('varchar',{
+        nullable: true
+    })
+    email_extra_d: string;
+
+    @Column('varchar',{
+        nullable: true
+    })
+    full_name_d: string;
+
+    @Column('varchar',{
+        nullable: true
+    })
+    payer_phone_d: string;
+
+    @Column('varchar',{
+        nullable: true
+    })
+    payer_phone: string;
+
     @ManyToOne(() => User, user => user.payer)
     user: User;
 

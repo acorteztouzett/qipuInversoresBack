@@ -34,9 +34,6 @@ export class Billing {
     currency: string;
 
     @Column('varchar')
-    account: string;
-
-    @Column('varchar')
     date_emission: string;
 
     @Column('varchar',{
@@ -68,9 +65,6 @@ export class Billing {
 
     @Column('varchar')
     n_commercial_qipu: string;
-
-    @Column('varchar')
-    bank_name: string;
 
     @Column('varchar')
     date_payout: string;
