@@ -178,10 +178,10 @@ export class BillingsService {
     const bills = await this.billingRepository.find({
       where: {
         user: { id: user.id },
-        payer: { full_name: Like(`%${search}%`) },
+        payer: { name_debtor: Like(`%${search}%`) },
       },
       relations: ['payer', 'operation'],
-      order: { payer: { full_name: 'ASC' } },
+      order: { payer: { name_debtor: 'ASC' } },
     });
     
     if (bills.length === 0) {
