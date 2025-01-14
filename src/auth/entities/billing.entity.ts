@@ -75,6 +75,11 @@ export class Billing {
     @Column('varchar')
     xmlLink: string;
 
+    @Column('varchar',{
+        nullable:true,
+    })
+    documentsustentLink: string;
+
     @Column('varchar')
     date_expiration: string;
 

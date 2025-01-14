@@ -96,12 +96,12 @@ export class PayerService {
 
     const pagadores = await this.payerRepository.find({
       where: { user: { id: user.id } },
-      order: { full_name: 'ASC' },
+      order: { name_debtor: 'ASC' },
     });
 
     const newPagadores = pagadores.map((item) => ({
-      name: item.full_name,
-      value: item.full_name,
+      name: item.name_debtor,
+      value: item.name_debtor,
       token: item.id,
     }));
 

@@ -195,7 +195,7 @@ export class BillingsService {
       detraction: item.detraction,
       net_amount: item.net_amount,
       currency: item.currency,
-      contactName: item.payer.full_name,
+      contactName: item.payer.name_debtor,
       date_emission: item.date_emission,
       status: item.status,
       date_payment: item.date_payment,
@@ -337,7 +337,13 @@ export class BillingsService {
       req.body.pdfLink = await this.uploadFileToS3(pdf, pdfKey);
       const xmlKey = `${userRuc}/pagadores/${contactName}/XML${req.body.billing_id}`;
       req.body.xmlLink = await this.uploadFileToS3(xml, xmlKey);
-      
+
+      if(req.files[2]){
+      const documentsustent= req.files[2];
+      const documentsustentKey = `${userRuc}/pagadores/${contactName}/DOCUMENTSUSTENT${req.body.billing_id}`;
+      req.body.documentsustentLink = await this.uploadFileToS3(documentsustent, documentsustentKey);
+      }
+
       const billing = this.billingRepository.create({ ...req.body,user, payer });
 
       await this.billingRepository.save(billing);
