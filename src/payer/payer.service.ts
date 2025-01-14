@@ -46,6 +46,7 @@ export class PayerService {
           { user: { id: user.id }, full_name: Like(`%${search}%`) },
           { user: { id: user.id }, name_debtor: Like(`%${search}%`) },
         ],
+        relations:['risk'],
         order: { full_name: 'ASC' },
       });
 
@@ -113,6 +114,7 @@ export class PayerService {
     
     const isAdmin = await this.userRepository.findOne({
       where: { id: token, role: In([0, 1]) },
+      relations:['risk'],
     });
 
     if (!isAdmin) {
@@ -178,6 +180,7 @@ export class PayerService {
 
     const contact = await this.payerRepository.findOne({
       where: { user: { id: user.id }, id: req.body.id },
+      relations:['risk'],
     });
 
     if (!contact) {
@@ -213,7 +216,7 @@ export class PayerService {
         role: 2,
         company_name: Like(`%${search}%`),
       },
-      relations: ['payer'],
+      relations: ['payer', 'payer.risk'],
       order: {
         company_name: 'ASC',
         payer: {
@@ -248,7 +251,7 @@ export class PayerService {
         role: 2,
         company_name: Like(`%${search}%`),
       },
-      relations: ['payer'],
+      relations: ['payer','payer.risk'],
       order: {
         company_name: 'ASC',
       },
