@@ -101,6 +101,7 @@ export class BillingsService {
         pdfLink: `${this.awsUrl}${billing.pdfLink}`,
         xmlFile: `${this.awsUrl}${billing.xmlLink}`,
         date_expiration: billing.date_expiration,
+        monthly_rate: billing.monthly_rate,
       })),
     }));
    
@@ -160,6 +161,7 @@ export class BillingsService {
         pdfLink: `${this.awsUrl}${bill.pdfLink}`,
         xmlFile: `${this.awsUrl}${bill.xmlLink}`,
         date_expiration: bill.date_expiration,
+        monthly_rate: bill.monthly_rate,
       })),
     }));
     
@@ -211,6 +213,7 @@ export class BillingsService {
       updatedAt: item.updatedAt,
       date_payout: item.date_payout,
       date_expiration: item.date_expiration,
+      monthly_rate: item.monthly_rate,
     }));
     
     return newBills;
@@ -268,6 +271,7 @@ export class BillingsService {
         pdfLink: `${this.awsUrl}${billing.pdfLink}`,
         xmlFile: `${this.awsUrl}${billing.xmlLink}`,
         date_expiration: billing.date_expiration,
+        monthly_rate: billing.monthly_rate,
     })) : [],
   }));
    

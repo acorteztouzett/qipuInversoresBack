@@ -68,6 +68,9 @@ export class Billing {
 
     @Column('varchar')
     date_payout: string;
+    
+    @Column('float')
+    monthly_rate: number;
 
     @Column('varchar')
     pdfLink: string;
