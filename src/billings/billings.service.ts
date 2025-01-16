@@ -689,7 +689,7 @@ export class BillingsService {
         where: {
           available_to_invest: true,
         },
-        relations: ['payer','payer.risk'],
+        relations: ['payer','payer.risk','billing'],
         order: {
           createdAt: 'DESC'
         }
