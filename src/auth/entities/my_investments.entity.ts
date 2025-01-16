@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Investor } from "./investor.entity";
 import { Operation } from "./operation.entity";
 
@@ -7,6 +7,19 @@ import { Operation } from "./operation.entity";
 export class MyInvestment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column('decimal',
+    {
+        precision: 19,
+        scale: 2
+    }
+  )
+  invested_amount: number;
+
+  @Column('timestamp',{
+    default:()=> 'CURRENT_TIMESTAMP - INTERVAL 5 HOUR'
+  })
+  createdAt:Date;
 
   @ManyToOne(() => Investor, (investor) => investor.myInvestments)
   investor: Investor;

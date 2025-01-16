@@ -455,20 +455,12 @@ export class BankService {
       });
       await this.transactionRepository.save(transaction);
 
-      const isAlreadyInvest =await this.myInvestmentRepository.findOne({
-        where:{
-          investment: operations,
-          investor: investor
-        }
-      })
-
-      if(!isAlreadyInvest){
-        const myInvestment = this.myInvestmentRepository.create({
-          investment: operations,
-          investor: investor,
-        });
-        await this.myInvestmentRepository.save(myInvestment);
-      }
+      const myInvestment = this.myInvestmentRepository.create({
+        investment: operations,
+        invested_amount: createInvestDto.investAmount,
+        investor: investor,
+      });
+      await this.myInvestmentRepository.save(myInvestment);
 
       return {message:'Investment completed successfully'};
     } catch (error) {
@@ -486,7 +478,7 @@ export class BankService {
         where:{ investor: {
           user_id: investor.user_id
         }},
-        relations:['investment']
+        relations:['investment','investment.payer','investment.payer.risk']
       });
 
       return myInvestments;
