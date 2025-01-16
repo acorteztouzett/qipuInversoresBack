@@ -45,7 +45,9 @@ export class Payer {
     })
     updatedAt:Date;
 
-    @Column('varchar')
+    @Column('varchar',{
+        nullable: true
+    })
     description: string;
 
     @Column('varchar')
