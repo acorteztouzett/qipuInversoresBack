@@ -706,7 +706,7 @@ export class BillingsService {
     try {
       const operation = await this.operationRepository.findOne({
         where: { id },
-        relations: ['payer','payer.risk'],
+        relations: ['payer','payer.risk','billing'],
       });
 
       if (!operation) throw new NotFoundException('Operation not found');
