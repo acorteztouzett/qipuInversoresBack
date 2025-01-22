@@ -57,6 +57,9 @@ export class Operation{
     )
     amount_to_finance: number;
 
+    @Column('varchar')
+    currency: string;
+
     @OneToMany(() => Billing, billing => billing.operation)
     billing: Billing[];
 

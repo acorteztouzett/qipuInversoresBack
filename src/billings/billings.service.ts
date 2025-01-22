@@ -504,11 +504,23 @@ export class BillingsService {
       throw new NotFoundException('Contact not found');
     }
     
-    const idsArray = req.body.ids.slice(1, -1).split(',');
+    const idsArray: string[] = req.body.ids.slice(1, -1).split(',');
+
+    const billings = await this.billingRepository.find({
+      where: {
+        id: In(idsArray),
+        currency: req.body.currency,
+      },
+    });
+
+    if(billings.length < idsArray.length){
+      throw new NotFoundException('Billings not found or currency is different');
+    }
     
     const newOperation = this.operationRepository.create({
       n_operation: req.body.n_operation,
       name: req.body.name,
+      currency: req.body.currency,
       payer: payer,
     });
     await this.operationRepository.save(newOperation);

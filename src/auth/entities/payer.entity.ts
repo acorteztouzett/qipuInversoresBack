@@ -50,7 +50,9 @@ export class Payer {
     })
     description: string;
 
-    @Column('varchar')
+    @Column('varchar',{
+        nullable: true
+    })
     sector: string;
 
     @Column('varchar',{
