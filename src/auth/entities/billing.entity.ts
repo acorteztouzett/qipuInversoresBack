@@ -2,6 +2,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user.entity";
 import { Operation } from "./operation.entity";
 import { Payer } from "./payer.entity";
+import { BillingStatus } from "src/utils/enums/billings.enum";
 
 @Entity('billings')
 export class Billing {
@@ -37,8 +38,7 @@ export class Billing {
     date_emission: string;
 
     @Column('varchar',{
-        default:null,
-        nullable:true
+        default:BillingStatus.INPROGRESS,
     })
     status: string;
 
