@@ -123,10 +123,11 @@ export class AwsService {
 
         if (existingDoc) {
           existingDoc.url = docUrl;
-          await this.documentationRepository.update(existingDoc.id, { url: docUrl, documentType: type });
+          await this.documentationRepository.update(existingDoc.id, { url: docUrl, documentType: type, statement_funds: req.body.statement_funds });
         } else {
           const newDoc = this.documentationRepository.create({
             documentType: type,
+            statement_funds: req.body.statement_funds,
             url: docUrl,
             investor: investor,
           });
