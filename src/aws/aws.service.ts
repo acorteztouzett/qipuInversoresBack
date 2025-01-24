@@ -123,11 +123,10 @@ export class AwsService {
 
         if (existingDoc) {
           existingDoc.url = docUrl;
-          await this.documentationRepository.update(existingDoc.id, { url: docUrl, documentType: type, statement_funds: req.body.statement_funds });
+          await this.documentationRepository.update(existingDoc.id, { url: docUrl, documentType: type });
         } else {
           const newDoc = this.documentationRepository.create({
             documentType: type,
-            statement_funds: req.body.statement_funds,
             url: docUrl,
             investor: investor,
           });
@@ -153,6 +152,7 @@ export class AwsService {
     try {
       const docs = investor.documentation.map((doc) => {
         return {
+          statement_funds: investor.statement_funds,
           type: doc.documentType,
           url: doc.url,
           status: doc.status
@@ -205,6 +205,7 @@ export class AwsService {
           const {investor,...docsData}=doc;
           return {
             ...docsData,
+            statement_funds: investor.statement_funds,
             clientName: `${investor.names} ${investor.surname}`,
             identifier: `${investor.document_type} ${investor.document}`,
           }

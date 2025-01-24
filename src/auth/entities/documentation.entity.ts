@@ -18,11 +18,6 @@ export class Documentation{
     })
     status: DocsStatus;
 
-    @Column('varchar',{
-        default: "-"
-    })
-    statement_funds: string;
-
     @Column('timestamp',{
         default:()=> 'CURRENT_TIMESTAMP - INTERVAL 5 HOUR'
     })
