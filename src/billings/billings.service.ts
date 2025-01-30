@@ -102,6 +102,7 @@ export class BillingsService {
         xmlFile: `${this.awsUrl}${billing.xmlLink}`,
         date_expiration: billing.date_expiration,
         monthly_rate: billing.monthly_rate,
+        payer_name: billing.payer.name_debtor,
       })),
     }));
    
