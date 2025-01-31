@@ -682,13 +682,13 @@ export class BillingsService {
       if (!operation) throw new NotFoundException('Operation not found');
 
       const totalAmount = operation.billing.reduce((acc, bill) => acc + bill.net_amount, 0);
-
+      console.log(createInvestmentDto.auctionCloseDate)
       await this.operationRepository.update({ id: operationId }, {
-        monthly_rate: createInvestmentDto.monthlyRate,
+        //monthly_rate: createInvestmentDto.monthlyRate,
         auction_close_date: createInvestmentDto.auctionCloseDate,
-        progress: 0,
-        available_to_invest: true,
-        amount_to_finance: totalAmount
+        //progress: 0,
+        //available_to_invest: true,
+        //amount_to_finance: totalAmount
       });
 
       return { msg: 'Investment created successfully' };

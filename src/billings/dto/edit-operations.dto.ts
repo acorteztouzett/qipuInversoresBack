@@ -25,7 +25,7 @@ export class EditOperationDto {
 
     @IsOptional()
     @IsString()
-    auctionCloseDate: Date;
+    auctionCloseDate: string;
 
     @IsOptional()
     @IsNumber()
