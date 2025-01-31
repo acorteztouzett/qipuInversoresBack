@@ -589,6 +589,8 @@ export class BillingsService {
             id: bill.id,
             billing_id: bill.billing_id,
             amount: bill.amount,
+            date_expiration: bill.date_expiration,
+            date_emision: bill.date_emission
           })) : [],
           
       }
