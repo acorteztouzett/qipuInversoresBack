@@ -478,7 +478,7 @@ export class BankService {
         where:{ investor: {
           user_id: investor.user_id
         }},
-        relations:['investment','investment.payer','investment.payer.risk']
+        relations:['investment','investment.payer','investment.payer.risk', 'investment.payer.billing']
       });
 
       return myInvestments;
