@@ -7,6 +7,7 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
 import { SearchBankAccountDto } from './dto/search-bank-account.dto';
 import { CreateInvestDto } from './dto/create-invest.dto';
+import { SearchInvestmentDto } from './dto/search-investment.dto';
 
 @Controller('bank')
 export class BankController {
@@ -64,9 +65,9 @@ export class BankController {
     return this.bankService.invest(token, id, createInvestDto);
   }
 
-  @Get('my-investments')
-  findMyInvestments(@Headers('token') token) {
-    return this.bankService.findMyInvestments(token);
+  @Post('my-investments')
+  findMyInvestments(@Headers('token') token, @Body() searchInvestmentDto:SearchInvestmentDto) {
+    return this.bankService.findMyInvestments(token, searchInvestmentDto);
   }
 
   @Get('investment')

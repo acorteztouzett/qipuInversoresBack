@@ -16,6 +16,7 @@ import { TransactionStatus,TransactionType } from '../utils/enums/transactions.e
 import { CreateInvestDto } from './dto/create-invest.dto';
 import { Operation } from '../auth/entities/operation.entity';
 import { MyInvestment } from '../auth/entities/my_investments.entity';
+import { SearchInvestmentDto } from './dto/search-investment.dto';
 
 @Injectable()
 export class BankService {
@@ -469,19 +470,42 @@ export class BankService {
     }
   }
 
-  async findMyInvestments(token:string){
+  async findMyInvestments(token:string, searchInvestmentDto:SearchInvestmentDto){
     try {
       const investor= await this.investorRepository.findOne({where:{user_id:token}});
       if(!investor) throw new UnauthorizedException('Invalid credentials');
 
-      const myInvestments = await this.myInvestmentRepository.find({
-        where:{ investor: {
+      const page = searchInvestmentDto.page ?? 1;
+      const limit = searchInvestmentDto.limit ?? 10;
+
+      const [myInvestments,totalItems] = await this.myInvestmentRepository.findAndCount({
+        where:{ 
+          investor: {
           user_id: investor.user_id
-        }},
-        relations:['investment','investment.payer','investment.payer.risk', 'investment.payer.billing']
+          },
+          investment: {
+            status: searchInvestmentDto.status ? searchInvestmentDto.status : null,
+            auction_close_date: searchInvestmentDto.closeDate ? searchInvestmentDto.closeDate : null,
+            payment_date: searchInvestmentDto.paymentDate ? searchInvestmentDto.paymentDate : null
+          }
+        },
+        
+        relations:['investment','investment.payer','investment.payer.risk', 'investment.payer.billing'],
+        skip: (page - 1) * limit,
+        take: limit
       });
 
-      return myInvestments;
+      const totalPages = Math.ceil(totalItems / limit);
+
+      return {
+        myInvestments,
+        meta: {
+          page,
+          limit,
+          totalItems,
+          totalPages
+      }
+    }
     } catch (error) {
       return this.handleErrors(error,'findMyInvestments')
     }

@@ -15,6 +15,7 @@ import decompress from 'decompress';
 import { SearchOperationsDto } from './dto/search-operations.dto';
 import { EditOperationDto } from './dto/edit-operations.dto';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
+import { SearchOportunityDto } from './dto/search-oportunity.dto';
 
 
 @Injectable()
@@ -697,20 +698,38 @@ export class BillingsService {
     }
   }
 
-  async getOportunities() {
+  async getOportunities(searchOportunityDto:SearchOportunityDto) {
     try {
-      const operations = await this.operationRepository.find({
+
+      const page = searchOportunityDto.page ?? 1;
+      const limit = searchOportunityDto.limit ?? 10;
+
+      const [operations,totalCount] = await this.operationRepository.findAndCount({
         where: {
           available_to_invest: true,
+          status: searchOportunityDto.status ? searchOportunityDto.status : null,
+          auction_close_date: searchOportunityDto.closeDate ? searchOportunityDto.closeDate : null,
+          payment_date: searchOportunityDto.paymentDate ? searchOportunityDto.paymentDate : null,
         },
         relations: ['payer','payer.risk','billing'],
         order: {
           createdAt: 'DESC'
-        }
+        },
+        skip: (page - 1) * limit,
+        take: limit
       });
 
-      return operations;
+      const totalPages = Math.ceil(totalCount / limit);
 
+      return {
+        operations,
+        meta: {
+          page,
+          limit,
+          totalItems: totalCount,
+          totalPages
+      }
+    }
     } catch (error) {
       throw new Error(error.message);
     } 

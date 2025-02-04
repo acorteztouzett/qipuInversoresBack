@@ -5,6 +5,7 @@ import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { SearchOperationsDto } from './dto/search-operations.dto';
 import { EditOperationDto } from './dto/edit-operations.dto';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
+import { SearchOportunityDto } from './dto/search-oportunity.dto';
 
 @Controller('billing')
 export class BillingsController {
@@ -141,8 +142,8 @@ export class BillingsController {
   }
 
   @Post('list-oportunities')
-  listOportunities() {
-    return this.billingsService.getOportunities();
+  listOportunities(@Body() searchOportunityDto:SearchOportunityDto) {
+    return this.billingsService.getOportunities(searchOportunityDto);
   }
 
   @Get('oportunity')
