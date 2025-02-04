@@ -593,7 +593,9 @@ export class BillingsService {
             billing_id: bill.billing_id,
             amount: bill.amount,
             date_expiration: bill.date_expiration,
-            date_emision: bill.date_emission
+            date_emision: bill.date_emission,
+            currency: bill.currency,
+            net_amount: bill.net_amount,
           })) : [],
           
       }
