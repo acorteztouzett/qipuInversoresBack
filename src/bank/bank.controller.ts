@@ -69,6 +69,11 @@ export class BankController {
     return this.bankService.findMyInvestments(token);
   }
 
+  @Get('investment')
+  findOneInvestment(@Headers('token') token, @Headers('id') id: string) {
+    return this.bankService.findOneInvestment(token, id);
+  }
+
   //ADMIN
 
   @Post('find-transactions-admin')

@@ -487,6 +487,24 @@ export class BankService {
     }
   }
 
+  async findOneInvestment(token:string, id:string){
+    try {
+      const investor= await this.investorRepository.findOne({where:{user_id:token}});
+      if(!investor) throw new UnauthorizedException('Invalid credentials');
+
+      const myInvestments = await this.myInvestmentRepository.findOne({
+        where:{ investor: {
+          user_id: investor.user_id
+        }},
+        relations:['investment','investment.payer','investment.payer.risk', 'investment.payer.billing']
+      });
+
+      return myInvestments;
+    } catch (error) {
+      return this.handleErrors(error,'findOneInvest')
+    }
+  }
+
   //ADMIN
 
   async findTransactionsAdmin(token:string, searchTransactionDto: SearchTransactionDto) {
