@@ -316,6 +316,8 @@ export class BillingsService {
       amount: item.amount,
       date_emission: item.date_emission,
       date_expiration: item.date_expiration,
+      currency: item.currency,
+      net_amount: item.net_amount,
     }));
   
     return newBills;
