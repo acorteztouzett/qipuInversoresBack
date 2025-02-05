@@ -140,6 +140,27 @@ export class AwsService {
     return res.status(200).json({ msg: 'uploaded successfully' });
   }
 
+  async validateDocs(token: string) {
+    try {
+      const investor = await this.investorRepository.findOne({ 
+        where: { user_id: token },
+        relations:['documentation']
+       });
+      if (!investor) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      const docsToValidate= investor.documentation.some(doc=>doc.status!==DocsStatus.Confirmado);
+
+      if(docsToValidate) return { validateToInvest: false};
+
+      return {validateToInvest: true};
+
+    } catch (error) {
+      this.handleErrors(error,'validateDocs')
+    }
+  }
+
   async listDocs(token: string) {
     const investor = await this.investorRepository.findOne({ 
       where: { user_id: token },

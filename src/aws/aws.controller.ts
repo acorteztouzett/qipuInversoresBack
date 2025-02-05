@@ -71,6 +71,11 @@ export class AwsController {
     }
   }
 
+  @Get('validate-docs')
+  async validateDocs(@Headers('token') token) {
+    return this.awsService.validateDocs(token);
+  }
+
   //ADMIN
   @Post('list-docs-admin')
   async listDocsAdmin(@Headers('token') token, @Body() searchDocDto:SearchDocDto) {
