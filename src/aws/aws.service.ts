@@ -7,7 +7,8 @@ import { Request, Response } from 'express';
 import { Investor } from '../auth/entities/investor.entity';
 import { Documentation } from '../auth/entities/documentation.entity';
 import { SearchDocDto } from './dto/search-doc.dto';
-import { DocsStatus } from './interfaces/docs-status.interface';
+import { DocsStatus, requiredDocsN, requiredDocsPJ } from './interfaces/docs-status.interface';
+import { eTypeUser } from 'src/auth/interfaces/userInterfaces';
 
 @Injectable()
 export class AwsService {
@@ -150,9 +151,17 @@ export class AwsService {
         throw new UnauthorizedException('User not found');
       }
 
-      const docsToValidate= investor.documentation.some(doc=>doc.status!==DocsStatus.Confirmado);
+      if(investor.documentation.length===0) return { validateToInvest: false};
 
-      if(docsToValidate) return { validateToInvest: false};
+      const docsToValidate= investor.user_type===eTypeUser['Persona Natural'] ? requiredDocsN : requiredDocsPJ;
+  
+      const hasAllRequiredDocs = docsToValidate.every(docType => 
+        investor.documentation.some(doc => doc.documentType === docType && doc.status === DocsStatus.Confirmado)
+      );
+  
+      if (!hasAllRequiredDocs) {
+        return { validateToInvest: false };
+      }
 
       return {validateToInvest: true};
 
