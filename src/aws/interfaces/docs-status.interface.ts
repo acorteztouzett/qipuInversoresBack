@@ -6,6 +6,6 @@ export enum DocsStatus {
     'Rechazado' = 'Rechazado',
 }
 
-export const requiredDocsN = ['frontDni', 'backDNI', 'others']
+export const requiredDocsN = ['frontDni', 'backDNI']
 
-export const requiredDocsPJ = ['rucfile', 'dnisrepresentant', 'vigencialegals', 'otherDocs']
+export const requiredDocsPJ = ['rucfile', 'dnisrepresentant', 'vigencialegals']
