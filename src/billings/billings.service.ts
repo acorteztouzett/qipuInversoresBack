@@ -340,14 +340,14 @@ export class BillingsService {
       const pdf= req.files[0];
       const xml= req.files[1];
           
-      const pdfKey = `${S3Path.Billing}/PDF${req.body.billing_id}`;
+      const pdfKey = `${S3Path.Billing}/${req.body.billing_id}/PDF`;
       req.body.pdfLink = await this.uploadFileToS3(pdf, pdfKey);
-      const xmlKey = `${S3Path.Billing}/XML${req.body.billing_id}`;
+      const xmlKey = `${S3Path.Billing}/${req.body.billing_id}/XML`;
       req.body.xmlLink = await this.uploadFileToS3(xml, xmlKey);
 
       if(req.files[2]){
       const documentsustent= req.files[2];
-      const documentsustentKey = `${S3Path.Billing}/DOCUMENTSUSTENT${req.body.billing_id}`;
+      const documentsustentKey = `${S3Path.Billing}/${req.body.billing_id}/DOCUMENTSUSTENT`;
       req.body.documentsustentLink = await this.uploadFileToS3(documentsustent, documentsustentKey);
       }
 

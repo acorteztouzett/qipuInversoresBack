@@ -40,19 +40,18 @@ export class AwsService {
       throw new UnauthorizedException('User not found');
     }
 
-    const userRuc = user.ruc;
     const params = {
       Bucket: process.env.AWSBUCKET,
-      Prefix: `${userRuc}`,
+      Prefix: `${S3Path.User}/${user.id}/`,
     };
 
     try {
       const data = await this.s3.send(new ListObjectsV2Command(params));
       
       const links = data.Contents.map((item) => {
-        const type = item.Key.replace("/", " ").split(" ");
+        const fileName = item.Key.split('/').pop();
         return {
-          type: type[1],
+          type: fileName,
           file: `${this.awsUrl}/${item.Key}`, 
         };
       });

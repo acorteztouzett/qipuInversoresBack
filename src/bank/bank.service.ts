@@ -255,8 +255,16 @@ export class BankService {
 
       const totalPages = Math.ceil(totalItems/limit);
 
+      const transactionsWithUrl= transactions.map((transaction) => {
+        const { voucher, ...transactionData } = transaction;
+        return {
+          ...transactionData,
+          voucher: voucher ? `${this.awsUrl}${encodeURI(voucher)}` : null
+        }
+      });
+
       return {
-        transactions,
+        transactionsWithUrl,
         meta:{
           page,
           limit,
@@ -287,7 +295,15 @@ export class BankService {
         relations:['transactions']
       });
 
-      return account;
+      const transactionWithUrl= account.transactions.map((transaction) => {
+        const { voucher, ...transactionData } = transaction;
+        return {
+          ...transactionData,
+          voucher: voucher ? `${this.awsUrl}${encodeURI(voucher)}` : null
+        }
+      });
+
+      return transactionWithUrl;
     } catch (error) {
       return this.handleErrors(error,'findOneTransaction')
     }
@@ -328,14 +344,13 @@ export class BankService {
 
       const upload = new PutObjectCommand(params);
       await this.s3.send(upload);
-      const docUrl = `${this.awsUrl}${encodeURIComponent(params.Key)}`;
 
       const deposit= this.transactionRepository.create({
         amount: req.body.amount,
         type_movement: TransactionType.DEPOSIT,
         status: TransactionStatus.PENDING,
         currency: account.currency,
-        voucher: docUrl,
+        voucher: params.Key,
         destination_account:req.body.destinationAccount,
         charge_account: req.body.chargeAccount,
         bank_operation_code: req.body.operationCode,
@@ -571,9 +586,10 @@ export class BankService {
       });
 
       const transactionsWithNames = transactions.map((transaction) => {
-        const { wallet, ...transactionData } = transaction;
+        const { wallet, voucher, ...transactionData } = transaction;
         return {
           ...transactionData,
+          voucher: voucher ? `${this.awsUrl}${encodeURI(voucher)}` : null,
           clientName: `${wallet.investor.names} ${wallet.investor.surname}`
         }
       }
@@ -676,12 +692,11 @@ export class BankService {
 
         const upload = new PutObjectCommand(params);
         await this.s3.send(upload);
-        const docUrl = `${this.awsUrl}${encodeURIComponent(params.Key)}`;
 
         await this.transactionRepository.update(transaction.id,{
           status: status,
           bank_operation_code: req.body.operationCode,
-          voucher: docUrl,
+          voucher: params.Key,
         });
       }
 
