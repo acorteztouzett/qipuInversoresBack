@@ -512,12 +512,9 @@ export class AuthService {
     const email = req.body.email;
 
     const existeUser = await this.userRepository.findOne({ where: { email } });
+    const existeInvestor = await this.investorRepository.findOne({ where: { email } });
 
-    if (existeUser) {
-      return res.status(401).json({ validate: false, msg: `El email ${email} ya existe` });
-    } else {
-      return res.status(200).json({ validate: true });
-    }
+    return res.status(200).json({ validate: existeUser? true: false, validateInvestor: existeInvestor? true: false });
   }
 
   async resetToken(@Req() req: Request,@Res() res: Response){

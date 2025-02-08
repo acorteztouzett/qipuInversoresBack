@@ -126,7 +126,7 @@ export class Payer {
     @ManyToOne(() =>Risk, risk => risk.payer)
     risk: Risk;
 
-    @ManyToOne(() => Billing, billing => billing.payer)
+    @OneToMany(() => Billing, billing => billing.payer)
     billing: Billing;
 
     @OneToMany(()=> Operation, operation => operation.payer)

@@ -20,7 +20,9 @@ export class Investor{
     @Column('varchar')
     surname: string;
 
-    @Column('varchar')
+    @Column('varchar',{
+        unique:true
+    })
     email: string;
 
     @Column('varchar')
