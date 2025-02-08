@@ -48,6 +48,8 @@ export class AwsController {
     }
   }
 
+  //INVERSOR
+
   @Post('upload-doc')
   @UseInterceptors(AnyFilesInterceptor())
   async uploadDoc(@Req() req:Request, @Res() res: Response) {

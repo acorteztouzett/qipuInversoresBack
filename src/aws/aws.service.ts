@@ -9,6 +9,8 @@ import { Documentation } from '../auth/entities/documentation.entity';
 import { SearchDocDto } from './dto/search-doc.dto';
 import { DocsStatus, requiredDocsN, requiredDocsPJ } from './interfaces/docs-status.interface';
 import { eTypeUser } from 'src/auth/interfaces/userInterfaces';
+import { S3Path } from 'src/utils/enums/s3path.enum';
+import { Upload } from '@aws-sdk/lib-storage';
 
 @Injectable()
 export class AwsService {
@@ -67,13 +69,11 @@ export class AwsService {
       throw new UnauthorizedException('User not found');
     }
 
-    const userRuc = user.ruc ? user.ruc: user.document;
-
     const {mimetype,buffer} = file;
     // Parámetros para S3
     const params = {
       Bucket: process.env.AWSBUCKET,
-      Key: `${userRuc}/${type}`,
+      Key: `${S3Path.User}/${user.id}/${type}`,
       Body: buffer,
       ContentType: mimetype,
     };
@@ -92,53 +92,56 @@ export class AwsService {
   async uploadDoc(req: Request, res: Response) {
     const token = req.headers['token'] as string;
     const investor = await this.investorRepository.findOne({ where: { user_id: token } });
+  
     if (!investor) {
       throw new UnauthorizedException('User not found');
     }
-
+  
     const files = req.files as Express.Multer.File[];
-
-    for (let i = 0; i < files.length; i++) {
-      const type=req.body[`type${i+1}`];
-
-      const { mimetype, buffer } = files[i];
-
-      let existingDoc = await this.documentationRepository.findOne({
-        where: { 
-          documentType: type, investor:{
-            user_id:token
-          }
-         },
-      });
-      
-      const params = {
-        Bucket: process.env.AWSBUCKET,
-        Key: `documentacion/${investor.document}/${type}`,
-        Body: buffer,
-        ContentType: mimetype,
-      };
-      try {
-        const upload = new PutObjectCommand(params);
-        await this.s3.send(upload);
-        const docUrl = `${process.env.AWSURL}${encodeURIComponent(params.Key)}`;
-
+  
+    try {
+      await Promise.all(files.map(async (file, index) => {
+        const type = req.body[`type${index + 1}`];
+        const { mimetype, buffer } = file;
+        
+        const existingDoc = await this.documentationRepository.findOne({
+          where: { 
+            documentType: type, 
+            investor: { user_id: token }
+          },
+        });
+  
+        const key = `${S3Path.Investor}/${investor.user_id}/${type}`;
+        console.log(key);
+        const upload = new Upload({
+          client: this.s3,
+          params: {
+            Bucket: process.env.AWSBUCKET,
+            Key: key,
+            Body: buffer,
+            ContentType: mimetype,
+          },
+        });
+  
+        await upload.done(); 
+  
         if (existingDoc) {
-          existingDoc.url = docUrl;
-          await this.documentationRepository.update(existingDoc.id, { url: docUrl, documentType: type });
+          await this.documentationRepository.update(existingDoc.id, { url: key, documentType: type });
         } else {
           const newDoc = this.documentationRepository.create({
             documentType: type,
-            url: docUrl,
-            investor: investor,
+            url: key,
+            investor,
           });
           await this.documentationRepository.save(newDoc);
         }
-      } catch (err) {
-        throw new BadRequestException(`Error uploading file: ${err}`);
-      }
+      }));
+  
+      return res.status(200).json({ msg: 'Uploaded successfully' });
+  
+    } catch (err) {
+      throw new BadRequestException(`Error uploading file: ${err.message}`);
     }
-
-    return res.status(200).json({ msg: 'uploaded successfully' });
   }
 
   async validateDocs(token: string) {
@@ -184,7 +187,7 @@ export class AwsService {
         return {
           statement_funds: investor.statement_funds,
           type: doc.documentType,
-          url: doc.url,
+          url: `${this.awsUrl}${encodeURI(doc.url)}`,
           status: doc.status
         };
       }); 
@@ -232,9 +235,10 @@ export class AwsService {
       const totalPages = Math.ceil(total / limit);
 
       const docsWithNames= docs.map((doc)=>{
-          const {investor,...docsData}=doc;
+          const {investor, url,...docsData}=doc;
           return {
             ...docsData,
+            url: `${this.awsUrl}${encodeURI(doc.url)}`,
             statement_funds: investor.statement_funds,
             clientName: `${investor.names} ${investor.surname}`,
             identifier: `${investor.document_type} ${investor.document}`,

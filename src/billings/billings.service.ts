@@ -16,6 +16,7 @@ import { SearchOperationsDto } from './dto/search-operations.dto';
 import { EditOperationDto } from './dto/edit-operations.dto';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
 import { SearchOportunityDto } from './dto/search-oportunity.dto';
+import { S3Path } from 'src/utils/enums/s3path.enum';
 
 
 @Injectable()
@@ -338,17 +339,15 @@ export class BillingsService {
       }
       const pdf= req.files[0];
       const xml= req.files[1];
-      const userRuc = user.ruc;
-      const contactName = payer.full_name.replace(/\s+/g, '');
           
-      const pdfKey = `${userRuc}/pagadores/${contactName}/PDF${req.body.billing_id}`;
+      const pdfKey = `${S3Path.Billing}/PDF${req.body.billing_id}`;
       req.body.pdfLink = await this.uploadFileToS3(pdf, pdfKey);
-      const xmlKey = `${userRuc}/pagadores/${contactName}/XML${req.body.billing_id}`;
+      const xmlKey = `${S3Path.Billing}/XML${req.body.billing_id}`;
       req.body.xmlLink = await this.uploadFileToS3(xml, xmlKey);
 
       if(req.files[2]){
       const documentsustent= req.files[2];
-      const documentsustentKey = `${userRuc}/pagadores/${contactName}/DOCUMENTSUSTENT${req.body.billing_id}`;
+      const documentsustentKey = `${S3Path.Billing}/DOCUMENTSUSTENT${req.body.billing_id}`;
       req.body.documentsustentLink = await this.uploadFileToS3(documentsustent, documentsustentKey);
       }
 

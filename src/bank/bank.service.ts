@@ -17,6 +17,7 @@ import { CreateInvestDto } from './dto/create-invest.dto';
 import { Operation } from '../auth/entities/operation.entity';
 import { MyInvestment } from '../auth/entities/my_investments.entity';
 import { SearchInvestmentDto } from './dto/search-investment.dto';
+import { S3Path } from 'src/utils/enums/s3path.enum';
 
 @Injectable()
 export class BankService {
@@ -320,7 +321,7 @@ export class BankService {
 
       const params = {
         Bucket: process.env.AWSBUCKET,
-        Key: `depositos/${investor.document}/${req.body.operationCode}`,
+        Key: `${S3Path.Deposit}/${investor.user_id}/${req.body.operationCode}`,
         Body: voucher.buffer,
         ContentType: voucher.mimetype,
       };
@@ -668,7 +669,7 @@ export class BankService {
 
         const params = {
           Bucket: process.env.AWSBUCKET,
-          Key: `retiros/${transaction.wallet.investor.document}/${req.body.operationCode}`,
+          Key: `${S3Path.Withdraw}/${transaction.wallet.investor.user_id}/${req.body.operationCode}`,
           Body: voucher.buffer,
           ContentType: voucher.mimetype,
         };
