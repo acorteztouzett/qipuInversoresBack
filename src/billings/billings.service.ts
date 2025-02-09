@@ -100,8 +100,9 @@ export class BillingsService {
         createdAt: billing.createdAt,
         updatedAt: billing.updatedAt,
         date_payout: billing.date_payout,
-        pdfLink: `${this.awsUrl}${billing.pdfLink}`,
-        xmlFile: `${this.awsUrl}${billing.xmlLink}`,
+        pdfLink: `${this.awsUrl}${encodeURI(billing.pdfLink)}`,
+        xmlFile: `${this.awsUrl}${encodeURI(billing.xmlLink)}`,
+        documentsustent: billing.documentsustentLink? `${this.awsUrl}${encodeURI(billing.documentsustentLink)}`: null,
         date_expiration: billing.date_expiration,
         monthly_rate: billing.monthly_rate,
         payer_name: billing.payer.name_debtor,
@@ -161,8 +162,9 @@ export class BillingsService {
         createdAt: bill.createdAt,
         updatedAt: bill.updatedAt,
         date_payout: bill.date_payout,
-        pdfLink: `${this.awsUrl}${bill.pdfLink}`,
-        xmlFile: `${this.awsUrl}${bill.xmlLink}`,
+        pdfLink: `${this.awsUrl}${encodeURI(bill.pdfLink)}`,
+        xmlFile: `${this.awsUrl}${encodeURI(bill.xmlLink)}`,
+        documentsustent: bill.documentsustentLink? `${this.awsUrl}${encodeURI(bill.documentsustentLink)}`: null,
         date_expiration: bill.date_expiration,
         monthly_rate: bill.monthly_rate,
       })),
@@ -271,8 +273,9 @@ export class BillingsService {
         createdAt: billing.createdAt,
         updatedAt: billing.updatedAt,
         date_payout: billing.date_payout,
-        pdfLink: `${this.awsUrl}${billing.pdfLink}`,
-        xmlFile: `${this.awsUrl}${billing.xmlLink}`,
+        pdfLink: `${this.awsUrl}${encodeURI(billing.pdfLink)}`,
+        xmlFile: `${this.awsUrl}${encodeURI(billing.xmlLink)}`,
+        documentsustent: billing.documentsustentLink? `${this.awsUrl}${encodeURI(billing.documentsustentLink)}`: null,
         date_expiration: billing.date_expiration,
         monthly_rate: billing.monthly_rate,
     })) : [],
@@ -340,20 +343,31 @@ export class BillingsService {
       const pdf= req.files[0];
       const xml= req.files[1];
           
-      const pdfKey = `${S3Path.Billing}/${req.body.billing_id}/PDF`;
-      req.body.pdfLink = await this.uploadFileToS3(pdf, pdfKey);
-      const xmlKey = `${S3Path.Billing}/${req.body.billing_id}/XML`;
-      req.body.xmlLink = await this.uploadFileToS3(xml, xmlKey);
+      const billing = this.billingRepository.create({ ...req.body,user, payer });
+      await this.billingRepository.save(billing);
 
-      if(req.files[2]){
+      const billSaved= await this.billingRepository.findOne({ where: { 
+        billing_id: req.body.billing_id,
+        payer: { id: req.body.contact_Id },
+        user: { id: token }
+      } });
+
+      const pdfKey = `${S3Path.Billing}/${billSaved.id}/PDF`;
+      await this.uploadFileToS3(pdf, pdfKey);
+      const xmlKey = `${S3Path.Billing}/${billSaved.id}/XML`;
+      await this.uploadFileToS3(xml, xmlKey);
+
       const documentsustent= req.files[2];
-      const documentsustentKey = `${S3Path.Billing}/${req.body.billing_id}/DOCUMENTSUSTENT`;
-      req.body.documentsustentLink = await this.uploadFileToS3(documentsustent, documentsustentKey);
+      const documentsustentKey = `${S3Path.Billing}/${billSaved.id}/DOCUMENTSUSTENT`;
+      if(req.files[2]){
+      await this.uploadFileToS3(documentsustent, documentsustentKey);
       }
 
-      const billing = this.billingRepository.create({ ...req.body,user, payer });
-
-      await this.billingRepository.save(billing);
+      await this.billingRepository.update({ 
+        billing_id: req.body.billing_id,
+        payer: { id: req.body.contact_Id },
+        user: { id: token }
+       }, { pdfLink: pdfKey, xmlLink :xmlKey, documentsustentLink:documentsustent?documentsustentKey:null });
       
       return { msg: 'Created successfully' };
     } catch (error) { 
@@ -397,24 +411,33 @@ export class BillingsService {
       const detraction = typeCoin + parsedXml.Invoice['cac:InvoiceLine'][0]['cac:TaxTotal'][0]['cbc:TaxAmount'][0]['_'];
       const dateEmission = dayjs(parsedXml.Invoice['cbc:IssueDate'][0]).format('DD/MM/YYYY');
 
-      await this.uploadToS3(user.ruc, sanitizedContactName, 'PDF', invoiceId, pdfData, pdfFile.path, 'application/pdf');
-      await this.uploadToS3(user.ruc, sanitizedContactName, 'XML', invoiceId, xmlData, xmlFile.path, 'application/xml');
-
       const billingData = {
         user: { id: user.id },
         bank_name: bankName,
         account,
         payer: { id: contact.id },
-        pdfLink: `${user.ruc}/pagadores/${sanitizedContactName}/PDF${invoiceId}`,
-        xmlLink: `${user.ruc}/pagadores/${sanitizedContactName}/XML${invoiceId}`,
         billing_id: invoiceId,
         amount,
         detraction,
         net_amount: netAmount,
         date_emission: dateEmission,
       };
-
+      
       await this.billingRepository.save(billingData);
+
+      const billSaved= await this.billingRepository.findOne({ where: billingData });
+
+      const pdfLink = `${S3Path.Billing}/${billSaved.id}/PDF`
+      const xmlLink = `${S3Path.Billing}/${billSaved.id}/XML`
+
+      await this.uploadToS3(billSaved.id,'PDF', pdfData, pdfFile.path, 'application/pdf');
+      await this.uploadToS3(billSaved.id,'XML', xmlData, xmlFile.path, 'application/xml');
+
+      await this.billingRepository.update({ 
+        billing_id: invoiceId,
+        payer: { id: contact.id },
+        user: { id: user.id }
+       }, { pdfLink, xmlLink });
     }
   }
   
@@ -769,10 +792,10 @@ export class BillingsService {
     return key;
   }
 
-  private async uploadToS3(ruc: string, contactName: string, fileType: string, invoiceId: string, fileData: Buffer, filePath: string, contentType: string) {
+  private async uploadToS3(billingId: string, fileType: string, fileData: Buffer, filePath: string, contentType: string) {
     const params = {
       Bucket: process.env.AWSBUCKET,
-      Key: `${ruc}/pagadores/${contactName}/${fileType}${invoiceId}`,
+      Key: `${S3Path.Billing}/${billingId}/${fileType}`,
       Body: fileData,
       ContentType: contentType,
     };
