@@ -264,7 +264,7 @@ export class BankService {
       });
 
       return {
-        transactionsWithUrl,
+        transactions:transactionsWithUrl,
         meta:{
           page,
           limit,
