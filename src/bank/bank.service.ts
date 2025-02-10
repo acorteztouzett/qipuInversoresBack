@@ -228,7 +228,7 @@ export class BankService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      const wallet= await this.walletRepository.find({
+      const wallet= await this.walletRepository.findOne({
         where:{
           investor: {
             user_id: investor.user_id
@@ -240,13 +240,15 @@ export class BankService {
       const [transactions,totalItems] = await this.transactionRepository.findAndCount({
         where:{ 
           currency:searchTransactionDto.currency, 
-          wallet: wallet,
           type_movement: searchTransactionDto.transactionType? searchTransactionDto.transactionType: null,
           status: searchTransactionDto.status? searchTransactionDto.status: null,
           createdAt: searchTransactionDto.operationDate
                     ? Raw(alias => `DATE(${alias}) = STR_TO_DATE('${searchTransactionDto.operationDate}', '%d/%m/%Y')`)
                     : null
           ,
+          wallet: {
+            id: wallet.id
+          }
         },
         order: {createdAt: 'DESC'},
         skip:(page-1)*limit,
