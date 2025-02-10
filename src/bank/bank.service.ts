@@ -237,6 +237,18 @@ export class BankService {
         }
       });
 
+      if(!wallet){
+        return {
+          transactions:[],
+          meta:{
+            page,
+            limit,
+            totalItems:0,
+            totalPages:0
+          }
+        }
+      }
+
       const [transactions,totalItems] = await this.transactionRepository.findAndCount({
         where:{ 
           currency:searchTransactionDto.currency, 
