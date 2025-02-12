@@ -417,8 +417,8 @@ export class BillingsService {
         account,
         payer: { id: contact.id },
         billing_id: invoiceId,
-        amount,
-        detraction,
+        amount: parseFloat(amount.replace(typeCoin, '')),
+        detraction: parseFloat(detraction.replace(typeCoin, '')),
         net_amount: netAmount,
         date_emission: dateEmission,
       };

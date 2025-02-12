@@ -18,10 +18,15 @@ export class Billing {
             scale: 2
         }
     )
-    amount: string;
+    amount: number;
 
-    @Column('varchar')
-    detraction: string;
+    @Column('decimal',
+        {
+            precision: 19,
+            scale: 2
+        }
+    )
+    detraction: number;
 
     @Column('decimal',
         {
@@ -45,8 +50,12 @@ export class Billing {
     @Column('varchar')
     date_payment: string;
 
-    @Column('varchar')
-    n_days: string;
+    @Column('integer',
+        {
+            nullable:true
+        }
+    )
+    n_days: number;
     
     @Column('varchar')
     commission: string;
