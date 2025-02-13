@@ -39,16 +39,16 @@ export class Billing {
     @Column('varchar')
     currency: string;
 
-    @Column('varchar')
-    date_emission: string;
+    @Column('timestamp')
+    date_emission: Date;
 
     @Column('varchar',{
         default:BillingStatus.INPROGRESS,
     })
     status: string;
 
-    @Column('varchar')
-    date_payment: string;
+    @Column('timestamp')
+    date_payment: Date;
 
     @Column('integer',
         {

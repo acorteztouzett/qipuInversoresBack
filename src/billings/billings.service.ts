@@ -409,7 +409,7 @@ export class BillingsService {
       const amount = typeCoin + parsedXml.Invoice['cac:InvoiceLine'][0]['cac:PricingReference'][0]['cac:AlternativeConditionPrice'][0]['cbc:PriceAmount'][0]['_'];
       const netAmount = parseFloat(parsedXml.Invoice['cac:InvoiceLine'][0]['cbc:LineExtensionAmount'][0]['_']);
       const detraction = typeCoin + parsedXml.Invoice['cac:InvoiceLine'][0]['cac:TaxTotal'][0]['cbc:TaxAmount'][0]['_'];
-      const dateEmission = dayjs(parsedXml.Invoice['cbc:IssueDate'][0]).format('DD/MM/YYYY');
+      const dateEmission = dayjs(parsedXml.Invoice['cbc:IssueDate'][0]).toDate();
 
       const billingData = {
         user: { id: user.id },
