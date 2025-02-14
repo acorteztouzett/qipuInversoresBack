@@ -228,12 +228,12 @@ export class BankService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      const wallet= await this.walletRepository.findOne({
+      const wallet= await this.walletRepository.find({
         where:{
           investor: {
             user_id: investor.user_id
           },
-          currency: searchTransactionDto.currency
+          currency: searchTransactionDto.currency ? searchTransactionDto.currency : null
         }
       });
 
@@ -259,7 +259,7 @@ export class BankService {
                     : null
           ,
           wallet: {
-            id: wallet.id
+            id: In(wallet.map((w) => w.id))
           }
         },
         order: {createdAt: 'DESC'},
