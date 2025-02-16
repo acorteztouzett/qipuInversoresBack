@@ -16,6 +16,9 @@ export class MyInvestment {
   )
   invested_amount: number;
 
+  @Column('varchar')
+  estimated_profit: string;
+
   @Column('timestamp',{
     default:()=> 'CURRENT_TIMESTAMP - INTERVAL 5 HOUR'
   })

@@ -1,4 +1,4 @@
-import { IsEnum, IsNumber } from "class-validator";
+import { IsEnum, IsNumber, IsString } from "class-validator";
 import { Currency } from '../../utils/enums/general-types.enums';
 
 
@@ -8,4 +8,7 @@ export class CreateInvestDto {
 
     @IsEnum(Currency)
     currency: Currency;
+
+    @IsString()
+    estimatedProfit: string;
 }

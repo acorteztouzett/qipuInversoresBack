@@ -490,6 +490,7 @@ export class BankService {
       const myInvestment = this.myInvestmentRepository.create({
         investment: operations,
         invested_amount: createInvestDto.investAmount,
+        estimated_profit: createInvestDto.estimatedProfit,
         investor: investor,
       });
       await this.myInvestmentRepository.save(myInvestment);
