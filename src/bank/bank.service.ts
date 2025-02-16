@@ -18,6 +18,7 @@ import { Operation } from '../auth/entities/operation.entity';
 import { MyInvestment } from '../auth/entities/my_investments.entity';
 import { SearchInvestmentDto } from './dto/search-investment.dto';
 import { S3Path } from 'src/utils/enums/s3path.enum';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class BankService {
@@ -515,8 +516,8 @@ export class BankService {
           },
           investment: {
             status: searchInvestmentDto.status ? searchInvestmentDto.status : null,
-            auction_close_date: searchInvestmentDto.closeDate ? searchInvestmentDto.closeDate : null,
-            payment_date: searchInvestmentDto.paymentDate ? searchInvestmentDto.paymentDate : null
+            auction_close_date: searchInvestmentDto.closeDate ? dayjs(searchInvestmentDto.closeDate,'DD/MM/YYYY').toDate() : null,
+            payment_date: searchInvestmentDto.paymentDate ? dayjs(searchInvestmentDto.paymentDate,'DD/MM/YYYY').toDate() : null
           }
         },
         

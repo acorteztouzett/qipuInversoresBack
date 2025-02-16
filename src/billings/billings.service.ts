@@ -10,7 +10,7 @@ import { In, Like, Raw, Repository } from 'typeorm';
 import { readFile, unlink } from 'fs/promises';
 import { Payer } from '../auth/entities/payer.entity';
 import * as xml2js from 'xml2js';
-import dayjs from 'dayjs';
+import * as dayjs from 'dayjs';
 import decompress from 'decompress';
 import { SearchOperationsDto } from './dto/search-operations.dto';
 import { EditOperationDto } from './dto/edit-operations.dto';
@@ -18,15 +18,14 @@ import { CreateInvestmentDto } from './dto/create-investment.dto';
 import { SearchOportunityDto } from './dto/search-oportunity.dto';
 import { S3Path } from 'src/utils/enums/s3path.enum';
 
-
 @Injectable()
 export class BillingsService {
   private readonly awsUrl=process.env.AWSURL;
   private s3 = new S3Client({
     region:process.env.AWS_S3_REGION,
     credentials:{
-        accessKeyId:process.env.AWS_S3_ACCESS_KEY_ID,
-        secretAccessKey:process.env.AWS_S3_SECRET_ACCESS_KEY
+      accessKeyId:process.env.AWS_S3_ACCESS_KEY_ID,
+      secretAccessKey:process.env.AWS_S3_SECRET_ACCESS_KEY
     }
   })
   constructor(
@@ -726,7 +725,6 @@ export class BillingsService {
 
   async getOportunities(searchOportunityDto:SearchOportunityDto) {
     try {
-
       const page = searchOportunityDto.page ?? 1;
       const limit = searchOportunityDto.limit ?? 10;
 
@@ -734,8 +732,8 @@ export class BillingsService {
         where: {
           available_to_invest: true,
           status: searchOportunityDto.status ? searchOportunityDto.status : null,
-          auction_close_date: searchOportunityDto.closeDate ? searchOportunityDto.closeDate : null,
-          payment_date: searchOportunityDto.paymentDate ? searchOportunityDto.paymentDate : null,
+          auction_close_date: searchOportunityDto.closeDate ? dayjs(searchOportunityDto.closeDate, 'DD/MM/YYYY').toDate() : null,
+          payment_date: searchOportunityDto.paymentDate ? dayjs(searchOportunityDto.paymentDate,'DD/MM/YYYY').toDate() : null,
         },
         relations: ['payer','payer.risk','billing'],
         order: {
@@ -744,7 +742,6 @@ export class BillingsService {
         skip: (page - 1) * limit,
         take: limit
       });
-
       const totalPages = Math.ceil(totalCount / limit);
 
       return {

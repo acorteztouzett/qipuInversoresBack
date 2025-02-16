@@ -24,8 +24,8 @@ export class Operation{
     })
     createdAt:Date;
 
-    @Column('varchar')
-    auction_close_date: string;
+    @Column('timestamp')
+    auction_close_date: Date;
 
     @Column('bool',{
         default: false
@@ -38,8 +38,8 @@ export class Operation{
     @Column('double')
     progress: number;
 
-    @Column('varchar')
-    payment_date: string;
+    @Column('timestamp')
+    payment_date: Date;
 
     @Column('decimal',
         {
