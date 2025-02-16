@@ -75,8 +75,8 @@ export class Billing {
     @Column('varchar')
     n_commercial_qipu: string;
 
-    @Column('varchar')
-    date_payout: string;
+    @Column('timestamp')
+    date_payout: Date;
     
     @Column('float')
     monthly_rate: number;
@@ -92,8 +92,8 @@ export class Billing {
     })
     documentsustentLink: string;
 
-    @Column('varchar')
-    date_expiration: string;
+    @Column('timestamp')
+    date_expiration: Date;
 
     @Column('timestamp',{
         default:()=> 'CURRENT_TIMESTAMP - INTERVAL 5 HOUR'
