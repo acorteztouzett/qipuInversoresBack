@@ -20,6 +20,9 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { templateVerificar, templateVerificarAdmin, templateVerificarCuenta } from '../utils/emailTemplates';
 import { Wallet } from './entities/wallet.entity';
 import { customAlphabet } from 'nanoid';
+import { WebConfig } from './entities/webconfig.entity';
+import { ConfigTypes } from 'src/utils/enums/configTypes.enums';
+import { GeneralStatus } from 'src/utils/enums/general-status.enums';
 
 @Injectable()
 export class AuthService {
@@ -35,7 +38,8 @@ export class AuthService {
     private readonly companyRepository: Repository<Company>,
     @InjectRepository(Wallet)
     private readonly walletRepository: Repository<Wallet>,
-    private readonly dataSource: DataSource,
+    @InjectRepository(WebConfig)
+    private readonly webConfigRepository: Repository<WebConfig>,
     private readonly jwtService: JwtService,
     private readonly mailerService: MailerService
   ){}
@@ -454,11 +458,17 @@ export class AuthService {
       if(!investor){
         throw new UnauthorizedException('Invalid credentials');
       }
-      const emailsNotification= await this.dataSource.query(`SELECT email FROM email_notification`);
+      const emailsNotification= await this.webConfigRepository.find({
+        where:{
+          type: ConfigTypes.EMAIL_NOTIFICATION,
+          status: GeneralStatus.ACTIVE
+        },
+        select:['name']
+      })
 
       await this.mailerService.sendMail({
         from:process.env.MAIL_USER,
-        to:emailsNotification.map(i=>i.email),
+        to:emailsNotification.map(i=>i.name),
         subject:'Solicitud de eliminación',
         html: `Info: ${investor.document_type} ${investor.document} Nombres: ${investor.names} ${investor.surname} Razon: ${body.request}`
       });

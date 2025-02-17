@@ -21,6 +21,7 @@ import { Wallet } from './entities/wallet.entity';
 import { User } from './entities/user.entity';
 import { Documentation } from './entities/documentation.entity';
 import { Transaction } from './entities/transaction.entity';
+import { WebConfig } from './entities/webconfig.entity';
 
 @Module({
   controllers: [AuthController],
@@ -28,7 +29,8 @@ import { Transaction } from './entities/transaction.entity';
   imports:[
     ConfigModule,
     TypeOrmModule.forFeature([
-      Investor, InvestorRepresentation, MyInvestment,BankAccount,Banks,Billing,Company,Operation,Operator,Payer,Risk,Wallet,User,Documentation,Transaction
+      Investor, InvestorRepresentation, MyInvestment,BankAccount,Banks,Billing,Company,
+      Operation,Operator,Payer,Risk,Wallet,User,Documentation,Transaction,WebConfig
     ]),
     PassportModule.register({defaultStrategy:'jwt'}),
     JwtModule.registerAsync({

@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Banks } from '../auth/entities/banks.entity';
 import { GeneralStatus } from '../utils/enums/general-status.enums';
 import { Risk } from '../auth/entities/risk.entity';
+import { WebConfig } from '../auth/entities/webconfig.entity';
+import { User } from '../auth/entities/user.entity';
+import { ConfigTypes } from 'src/utils/enums/configTypes.enums';
 
 @Injectable()
 export class UtilService {
@@ -12,7 +15,11 @@ export class UtilService {
     @InjectRepository(Banks)
     private readonly banksRepository: Repository<Banks>,
     @InjectRepository(Risk)
-    private readonly riskRepository: Repository<Risk>
+    private readonly riskRepository: Repository<Risk>,
+    @InjectRepository(WebConfig)
+    private readonly webConfigRepository: Repository<WebConfig>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async getDepartments() {
@@ -60,6 +67,54 @@ export class UtilService {
     try {
       const results = await this.riskRepository.find();
       return results;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async getWebConfig() {
+    try {
+      const results = await this.webConfigRepository.find({
+        where: {
+          type: ConfigTypes.WEB_CONFIG,
+          status: GeneralStatus.ACTIVE
+        },
+        select: ['id', 'name', 'value', 'description']
+      });
+      return results;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async updateWebConfig(token:string, value: number){
+    try {
+      const isAdmin = await this.userRepository.findOne({
+        where: {
+          id: token,
+          role: 1
+        }
+      });
+
+      if (!isAdmin) {
+        throw new Error('Unauthorized');
+      }
+      
+      const config = await this.webConfigRepository.findOne({
+        where: {
+          type: ConfigTypes.WEB_CONFIG,
+          status: GeneralStatus.ACTIVE
+        }
+      });
+      if (!config) {
+        throw new Error('Web config not found');
+      }
+
+      this.webConfigRepository.update(config.id, {
+        value,
+        name: `${value} días`
+      });
+
     } catch (error) {
       throw new Error(error);
     }

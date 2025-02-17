@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Header, Headers } from '@nestjs/common';
 import { UtilService } from './util.service';
 
 @Controller('util')
@@ -28,5 +28,15 @@ export class UtilController {
   @Get('list-risk')
   async getRisk() {
     return await this.utilService.getRisk();
+  }
+
+  @Get('web-config')
+  async getWebConfig() {
+    return await this.utilService.getWebConfig();
+  }
+
+  @Put('web-config')
+  async updateWebConfig(@Body() body, @Headers('token') token: string) {
+    return await this.utilService.updateWebConfig(token, body.value);
   }
 }
