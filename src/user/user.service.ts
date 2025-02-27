@@ -9,6 +9,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { templateResetear, templateVerificar, templateVerificarAdmin } from 'src/utils/emailTemplates';
 import { customAlphabet } from 'nanoid';
 import { Request, Response } from 'express';
+import { Roles } from 'src/utils/enums/general-status.enums';
 
 @Injectable()
 export class UserService {
@@ -129,7 +130,7 @@ export class UserService {
     async mostrarUsersOperador(@Req() req, @Res() res){
         const token = req.headers['token'] as string;
         const isAdmin = await this.userRepository.findOne({ 
-          where: { id: token, role: 1 },
+          where: { id: token, role: Roles.OPERATOR },
           relations: ['operator'],
         });
         if (!isAdmin) {
@@ -145,7 +146,7 @@ export class UserService {
           order: {'company_name': 'ASC'},
           relations: ['operator'],
           where: {
-            role: 2, 
+            role: Roles.USER, 
             operator:{  id: operator.id }},
         });
 
@@ -231,7 +232,7 @@ export class UserService {
 
     async mostrarOperadores(@Req() req, @Res() res){
         const token = req.headers['token'] as string;
-        const isAdmin = await this.userRepository.findOne({ where: { id: token, role: 0 } });
+        const isAdmin = await this.userRepository.findOne({ where: { id: token, role: In[Roles.ADMIN, Roles.OPERATOR] } });
         if (!isAdmin) {
           throw new HttpException('Permission denied', HttpStatus.UNAUTHORIZED);
         }

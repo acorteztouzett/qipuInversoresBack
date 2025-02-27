@@ -9,6 +9,8 @@ import { UserModule } from './user/user.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { UtilModule } from './util/util.module';
 import { BankModule } from './bank/bank.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -36,6 +38,10 @@ import { BankModule } from './bank/bank.module';
         }
       },    
     }),
+    ThrottlerModule.forRoot([{
+      ttl: 60000, // milliseconds
+      limit: 30, // requests
+    }]),
     AuthModule,
     AwsModule,
     PayerModule,
@@ -44,5 +50,11 @@ import { BankModule } from './bank/bank.module';
     UtilModule,
     BankModule,
   ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    }
+  ]
 })
 export class AppModule {}
