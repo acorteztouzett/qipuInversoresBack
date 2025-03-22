@@ -17,6 +17,7 @@ import { EditOperationDto } from './dto/edit-operations.dto';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
 import { SearchOportunityDto } from './dto/search-oportunity.dto';
 import { S3Path } from 'src/utils/enums/s3path.enum';
+import { Roles } from 'src/utils/enums/general-status.enums';
 
 @Injectable()
 export class BillingsService {
@@ -286,7 +287,7 @@ export class BillingsService {
   async getInfoUserAdmin(@Req() req: Request,@Res() res: Response){
     const token = req.headers['token'] as string;
     const isAdmin = await this.userRepository.findOne({
-      where: { id: token, role: In([0, 1]) },
+      where: { id: token, role: In([Roles.ADMIN, Roles.OPERATOR]) },
     });
   
     if (!isAdmin) {
@@ -306,7 +307,7 @@ export class BillingsService {
     
     const bills = await this.billingRepository.find({
       where: { user: { id: user.id }, payer: { id: pagador.id } },
-      relations: ['payer','user']
+      relations: ['payer','user','operation']
     });
   
     if (!bills || bills.length === 0) {
@@ -321,6 +322,7 @@ export class BillingsService {
       date_expiration: item.date_expiration,
       currency: item.currency,
       net_amount: item.net_amount,
+      usedInOperation: item.operation?true:false,
     }));
   
     return newBills;

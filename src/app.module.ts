@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config'
 import { AuthModule } from './auth/auth.module';
@@ -11,6 +11,7 @@ import { UtilModule } from './util/util.module';
 import { BankModule } from './bank/bank.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { RequestLoggerMiddleware } from './util/middleware/request-logger.middleware';
 
 @Module({
   imports: [
@@ -57,4 +58,8 @@ import { APP_GUARD } from '@nestjs/core';
     }
   ]
 })
-export class AppModule {}
+export class AppModule {
+  configure(cosumer: MiddlewareConsumer) {
+    cosumer.apply(RequestLoggerMiddleware).forRoutes('*');
+  }
+}
