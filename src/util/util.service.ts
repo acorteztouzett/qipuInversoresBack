@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Banks } from '../auth/entities/banks.entity';
-import { GeneralStatus } from '../utils/enums/general-status.enums';
+import { GeneralStatus, Roles } from '../utils/enums/general-status.enums';
 import { Risk } from '../auth/entities/risk.entity';
 import { WebConfig } from '../auth/entities/webconfig.entity';
 import { User } from '../auth/entities/user.entity';
@@ -92,7 +92,7 @@ export class UtilService {
       const isAdmin = await this.userRepository.findOne({
         where: {
           id: token,
-          role: 1
+          role: Roles.ADMIN
         }
       });
 

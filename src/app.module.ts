@@ -23,7 +23,7 @@ import { RequestLoggerMiddleware } from './util/middleware/request-logger.middle
       database: process.env.DB_DATABASE,
       password: process.env.DB_PASSWORD,
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: false,
     }),
     MailerModule.forRoot({
       transport:{

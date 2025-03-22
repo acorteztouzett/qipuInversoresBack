@@ -11,6 +11,7 @@ import { DocsStatus, requiredDocsN, requiredDocsPJ } from './interfaces/docs-sta
 import { eTypeUser } from 'src/auth/interfaces/userInterfaces';
 import { S3Path } from 'src/utils/enums/s3path.enum';
 import { Upload } from '@aws-sdk/lib-storage';
+import { Roles } from 'src/utils/enums/general-status.enums';
 
 @Injectable()
 export class AwsService {
@@ -111,7 +112,7 @@ export class AwsService {
         });
   
         const key = `${S3Path.Investor}/${investor.user_id}/${type}`;
-        console.log(key);
+
         const upload = new Upload({
           client: this.s3,
           params: {
@@ -202,7 +203,7 @@ export class AwsService {
       const admin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: In([0, 1])
+          role: In([Roles.ADMIN, Roles.OPERATOR])
         }}
       );
 
@@ -265,7 +266,7 @@ export class AwsService {
       const admin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: In([0, 1])
+          role: In([Roles.ADMIN, Roles.OPERATOR])
         }}
       );
       if (!admin) {

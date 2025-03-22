@@ -18,7 +18,6 @@ export class BillingsController {
       const response = await this.billingsService.getInfoOperator(req, res);
       return res.status(200).json(response);
     } catch (error) {
-      console.log(error);
       return res.status(400).json({ msg: error.message });
     }
   }
@@ -77,7 +76,6 @@ export class BillingsController {
       const response = await this.billingsService.createBill(req, res);
       return res.status(200).json(response);
     } catch (error) {
-      console.log(error);
       return res.status(400).json({ msg: error.message });
     }
   }

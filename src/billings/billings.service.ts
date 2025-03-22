@@ -46,7 +46,7 @@ export class BillingsService {
     const token = req.headers['token'] as string;
     const { search } = req.query;
     const isAdmin = await this.userRepository.findOne({ 
-      where: { id: token, role: 1 } ,
+      where: { id: token, role: Roles.ADMIN } ,
       relations: ['operator'],
     });
     if (!isAdmin) {
@@ -57,7 +57,7 @@ export class BillingsService {
        
     const users = await this.userRepository.find({
       where: {
-        role: 2,
+        role: Roles.USER,
         operator: { id: operator.id },
         company_name: Like(`%${search}%`),
       },
@@ -115,7 +115,7 @@ export class BillingsService {
   async getInfoAdmin(@Req() req: Request,@Res() res: Response){
     const token = req.headers['token'] as string;
     const { search } = req.query;
-    const isAdmin = await this.userRepository.findOne({ where: { id: token, role: 0 } });
+    const isAdmin = await this.userRepository.findOne({ where: { id: token, role: Roles.ADMIN } });
     if (!isAdmin) {
       throw new UnauthorizedException('Permission denied');
     }
@@ -227,7 +227,7 @@ export class BillingsService {
   async getOperation(@Req() req: Request,@Res() res: Response){
     const token = req.headers['token'] as string;
     const { search } = req.query;
-    const isAdmin = await this.userRepository.findOne({ where: { id: token, role: In([0, 1]) } });
+    const isAdmin = await this.userRepository.findOne({ where: { id: token, role: In([Roles.ADMIN,Roles.OPERATOR]) } });
     if (!isAdmin) {
       throw new UnauthorizedException('Permission denied');
     }
@@ -372,7 +372,6 @@ export class BillingsService {
       
       return { msg: 'Created successfully' };
     } catch (error) { 
-      console.log(error)
       return error
     }
   }
@@ -445,7 +444,7 @@ export class BillingsService {
   async editBill(@Req() req: Request,@Res() res: Response){
     const token = req.headers['token'] as string;
     const isAdmin = await this.userRepository.findOne({
-      where: { id: token, role: In([0, 1]) },
+      where: { id: token, role: In([Roles.ADMIN,Roles.OPERATOR]) },
     });
     
     if (!isAdmin) {
@@ -467,7 +466,7 @@ export class BillingsService {
   async editOperation(@Req() req: Request,@Res() res: Response){
     const token = req.headers['token'] as string;
     const isAdmin = await this.userRepository.findOne({
-      where: { id: token, role: In([0, 1]) },
+      where: { id: token, role: In([Roles.ADMIN,Roles.OPERATOR]) },
     });
     
     const payer= await this.payerRepository.findOne({ where: { id: req.body.contact_Id } });
@@ -518,7 +517,7 @@ export class BillingsService {
   async operationBill(@Req() req: Request,@Res() res: Response){
     const token = req.headers['token'] as string;
     const isAdmin = await this.userRepository.findOne({
-      where: { id: token, role: In([0, 1]) },
+      where: { id: token, role: In([Roles.ADMIN,Roles.OPERATOR]) },
     });
     
     const payer= await this.payerRepository.findOne({ where: { id: req.body.contact_Id } });
@@ -575,7 +574,7 @@ export class BillingsService {
       const isAdmin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: In([0,1])
+          role: In([Roles.ADMIN,Roles.OPERATOR])
         }}
       );
 
@@ -644,7 +643,7 @@ export class BillingsService {
       const isAdmin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: In([0,1])
+          role: In([Roles.ADMIN,Roles.OPERATOR])
         }}
       );
 
@@ -694,7 +693,7 @@ export class BillingsService {
       const isAdmin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: In([0,1])
+          role: In([Roles.ADMIN,Roles.OPERATOR])
         }}
       );
 
@@ -720,7 +719,6 @@ export class BillingsService {
 
       return { msg: 'Investment created successfully' };
     } catch (error) {
-      console.log(error)
       throw new Error(error.message);
     }
   }

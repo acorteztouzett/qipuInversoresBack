@@ -5,6 +5,7 @@ import { User } from '../auth/entities/user.entity';
 import { In, Like, Repository } from 'typeorm';
 import { Payer } from '../auth/entities/payer.entity';
 import { Operator } from '../auth/entities/operator.entity';
+import { Roles } from 'src/utils/enums/general-status.enums';
 
 @Injectable()
 export class PayerService {
@@ -63,7 +64,7 @@ export class PayerService {
 
     const token = req.headers['token'] as string;
     const isAdmin = await this.userRepository.findOne({
-      where: { id: token, role: In([0, 1]) },
+      where: { id: token, role: In([Roles.ADMIN,Roles.OPERATOR]) },
     });
 
     if (!isAdmin) {
@@ -113,7 +114,7 @@ export class PayerService {
     const token = req.headers['token'] as string;
     
     const isAdmin = await this.userRepository.findOne({
-      where: { id: token, role: In([0, 1]) },
+      where: { id: token, role: In([Roles.ADMIN,Roles.OPERATOR]) },
       relations:['risk'],
     });
 
@@ -152,7 +153,7 @@ export class PayerService {
   async modificarContacto(@Req() req: Request, @Res() res: Response) {
     const token = req.headers['token'] as string;
     const isAdmin = await this.userRepository.findOne({
-      where: { id: token, role: In([0, 1, 2]) },
+      where: { id: token, role: In([Roles.ADMIN,Roles.OPERATOR,Roles.USER]) },
     });
 
     if (!isAdmin) {
@@ -194,7 +195,7 @@ export class PayerService {
     const {search}=req.query
     const token = req.headers['token'] as string;
     const isAdmin = await this.userRepository.findOne({
-      where: { id: token, role: 1 },
+      where: { id: token, role: Roles.ADMIN },
       relations: ['operator'],
     });
 
@@ -213,7 +214,7 @@ export class PayerService {
     const usersWithContacts = await this.userRepository.find({
       where: {
         operator: { id: operator.id },
-        role: 2,
+        role: Roles.USER,
         company_name: Like(`%${search}%`),
       },
       relations: ['payer', 'payer.risk'],
@@ -239,7 +240,7 @@ export class PayerService {
     const { search } = req.query;
     const token = req.headers['token'] as string;
     const isAdmin = await this.userRepository.findOne({
-      where: { id: token, role: 0 },
+      where: { id: token, role: Roles.ADMIN },
     });
 
     if (!isAdmin) {
@@ -248,7 +249,7 @@ export class PayerService {
 
     const usersWithContacts = await this.userRepository.find({
       where: {
-        role: 2,
+        role: Roles.USER,
         company_name: Like(`%${search}%`),
       },
       relations: ['payer','payer.risk'],

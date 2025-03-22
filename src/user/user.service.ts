@@ -24,7 +24,7 @@ export class UserService {
 
     async editUser(@Req() req, @Res() res){
         const token = req.headers['token'] as string;
-        const isAdmin = await this.userRepository.findOne({ where: { id: token, role: In([0, 1]) } });
+        const isAdmin = await this.userRepository.findOne({ where: { id: token, role: In([Roles.ADMIN,Roles.OPERATOR]) } });
 
         if (!isAdmin) {
           throw new HttpException('Permission denied', HttpStatus.UNAUTHORIZED);
@@ -43,15 +43,13 @@ export class UserService {
 
     async mostrarUsers(@Req() req, @Res() res){
         const token = req.headers['token'] as string;
-        const isAdmin = await this.userRepository.findOne({ where: { id: token, role: In([0, 1]) } });
+        const isAdmin = await this.userRepository.findOne({ where: { id: token, role: In([Roles.ADMIN,Roles.OPERATOR]) } });
         if (!isAdmin) {
           throw new HttpException('Permission denied', HttpStatus.UNAUTHORIZED);
         }
     
         const { search,role,page=1,limit=10 } = req.body;
 
-        
-      
         const today = dayjs().format('YYYY-MM-DD');
         
         const [users,totalItems] = await this.userRepository.findAndCount({
@@ -179,14 +177,14 @@ export class UserService {
 
     async mostrarUsersNameToken(@Req() req, @Res() res){
         const token = req.headers['token'] as string;
-        const isAdmin=await this.userRepository.findOne({where:{id:token,role:0}})
+        const isAdmin=await this.userRepository.findOne({where:{id:token,role:Roles.ADMIN}})
         if(!isAdmin){
             return res.status(401).json({msg:'permission denied'})
         }
 
         const user=await this.userRepository.find({
             order:{'company_name':'ASC'},
-            where:{role:2}
+            where:{role:Roles.USER}
         })
         if(!user){
             return res.status(401).json({msg:'users not found'})
@@ -203,7 +201,7 @@ export class UserService {
     async mostrarUsersNameTokenOperador(@Req() req, @Res() res){
         const token = req.headers['token'] as string;
         const isAdmin=await this.userRepository.findOne({
-          where:{id:token,role:1},
+          where:{id:token,role:Roles.ADMIN},
           relations:['operator']
         })
         if(!isAdmin){
@@ -214,7 +212,7 @@ export class UserService {
         const contacts=await this.userRepository.find({
             order:{'name':'ASC'},
             relations:['operator'],
-            where:{operator:{id:operator.id} , role:2}
+            where:{operator:{id:operator.id} , role:Roles.USER}
         })
         if(!contacts){
             return res.status(401).json({msg:'users not found'})
@@ -300,7 +298,7 @@ export class UserService {
 
     async crearUserAdmin(@Req() req: Request, @Res() res:Response){
         const token = req.headers['token'] as string;
-        const isAdmin = await this.userRepository.findOne({ where: { id: token, role: 0 } });
+        const isAdmin = await this.userRepository.findOne({ where: { id: token, role: Roles.ADMIN } });
         if (!isAdmin) {
           throw new HttpException('Permission denied', HttpStatus.UNAUTHORIZED);
         }
@@ -352,7 +350,7 @@ export class UserService {
 
     async asignarOperador(@Req() req, @Res() res){
         const token = req.headers['token'] as string;
-        const isAdmin=await this.userRepository.findOne({where:{id:token,role:0}})
+        const isAdmin=await this.userRepository.findOne({where:{id:token,role: Roles.ADMIN}})
         if(!isAdmin){
             return res.status(401).json({msg:'permission denied'})
         }
@@ -367,7 +365,7 @@ export class UserService {
 
     async editOperator(@Req() req, @Res() res){
       const token = req.headers['token'] as string;
-      const isAdmin = await this.userRepository.findOne({ where: { id: token, role: 0 } });
+      const isAdmin = await this.userRepository.findOne({ where: { id: token, role: Roles.ADMIN } });
       if (!isAdmin) {
         throw new HttpException('Permission denied', HttpStatus.UNAUTHORIZED);
       }
@@ -388,7 +386,7 @@ export class UserService {
 
     async deleteOperator(@Req() req, @Res() res){
       const token = req.headers['token'] as string;
-      const isAdmin = await this.userRepository.findOne({ where: { id: token, role: 0 } });
+      const isAdmin = await this.userRepository.findOne({ where: { id: token, role: Roles.ADMIN } });
       if (!isAdmin) {
         throw new HttpException('Permission denied', HttpStatus.UNAUTHORIZED);
       }
@@ -398,7 +396,7 @@ export class UserService {
           operator:{
             id: req.body.id
           },
-          role: 1 
+          role: Roles.OPERATOR
         },
          relations: ['operator'],
       });
@@ -408,7 +406,7 @@ export class UserService {
 
       await this.userRepository.delete({ 
         id: userOperator.id,
-        role: 1,
+        role: Roles.OPERATOR,
        });
       await this.operatorRepository.delete({ id: userOperator.operator.id });
 
@@ -417,12 +415,12 @@ export class UserService {
 
     async deleteUser(@Req() req, @Res() res){
       const token = req.headers['token'] as string;
-      const isAdmin = await this.userRepository.findOne({ where: { id: token, role: 0 } });
+      const isAdmin = await this.userRepository.findOne({ where: { id: token, role: Roles.ADMIN } });
       if (!isAdmin) {
         throw new HttpException('Permission denied', HttpStatus.UNAUTHORIZED);
       }
 
-      const user = await this.userRepository.findOne({ where: { id: req.body.id, role: 2 } });
+      const user = await this.userRepository.findOne({ where: { id: req.body.id, role: Roles.USER } });
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
@@ -453,7 +451,7 @@ export class UserService {
       const token = req.headers['token'] as string;
       const isAdmin = await this.userRepository.findOne({ 
         relations: ['operator'],
-        where: { id: token, role: 1 } 
+        where: { id: token, role: Roles.OPERATOR } 
       });
       if (!isAdmin) {
         throw new HttpException('Permission denied', HttpStatus.UNAUTHORIZED);
@@ -532,7 +530,7 @@ export class UserService {
     async emailUser(@Req() req, @Res() res){
       try {
         const token=req.header('token') as string;
-        const isAdmin=await this.userRepository.findOne({where:{id:token,role: In([0,1]) }})
+        const isAdmin=await this.userRepository.findOne({where:{id:token,role: In([Roles.ADMIN,Roles.OPERATOR]) }})
         if(!isAdmin){
             return res.status(401).json({msg:'permission denied'})
         }

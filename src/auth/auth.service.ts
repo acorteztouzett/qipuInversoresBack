@@ -132,7 +132,6 @@ export class AuthService {
       };
       
     } catch (error) {
-      console.log(error)
       this.handleErrors(error,'create')
     }
   }
@@ -181,7 +180,6 @@ export class AuthService {
       return;
       
     } catch (error) {
-      console.log(error)
       this.handleErrors(error,'sendVerificationEmail')
     }
   }
@@ -259,7 +257,6 @@ export class AuthService {
 
        return {userData,wallets};
     } catch (error) {
-      console.log(error)
       this.handleErrors(error,'getAccount')
     }
   }
@@ -307,7 +304,6 @@ export class AuthService {
       }
 
     } catch (error) {
-      console.log(error)
       this.handleErrors(error,'editAccount')
     }
   }
@@ -396,7 +392,6 @@ export class AuthService {
         message:'Rep updated successfully'
       }
     } catch (error) {
-      console.log(error)
       return this.handleErrors(error,'editInvestorRep')
     }
   }
@@ -426,7 +421,6 @@ export class AuthService {
         message:'Rep deleted successfully'
       }
     } catch (error) {
-      console.log(error)
       return this.handleErrors(error,'deleteInvestorRep')
     }
   }
@@ -481,7 +475,6 @@ export class AuthService {
         message:'Request sent successfully'
       };
     } catch (error) {
-      console.log(error);
       this.handleErrors(error,'deleteRequest');
     }
   }
@@ -501,7 +494,6 @@ export class AuthService {
 
       return requests;
     } catch (error) {
-      console.log(error);
       this.handleErrors(error,'listDeleteRequests');
     }
   }

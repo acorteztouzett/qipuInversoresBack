@@ -101,7 +101,6 @@ export class AuthController {
 
       return res.status(200).json({ validate: true });
     } catch (error) {
-      console.log(error);
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

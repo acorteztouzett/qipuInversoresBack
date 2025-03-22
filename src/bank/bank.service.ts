@@ -19,6 +19,7 @@ import { MyInvestment } from '../auth/entities/my_investments.entity';
 import { SearchInvestmentDto } from './dto/search-investment.dto';
 import { S3Path } from 'src/utils/enums/s3path.enum';
 import * as dayjs from 'dayjs';
+import { Roles } from 'src/utils/enums/general-status.enums';
 
 @Injectable()
 export class BankService {
@@ -98,7 +99,6 @@ export class BankService {
       return {message:'Bank account created successfully'};
       
     } catch (error) {
-      console.log(error)
       return this.handleErrors(error,'create')
     }
   }
@@ -175,7 +175,6 @@ export class BankService {
 
       return {message:'Bank account updated successfully'};
     } catch (error) {
-      console.log(error)
       return this.handleErrors(error,'update')
     }
   }
@@ -213,7 +212,6 @@ export class BankService {
       return {message:'Bank account deleted successfully'}
 
     } catch (error) {
-      console.log(error)
       return this.handleErrors(error,'remove')
     }
   }
@@ -288,7 +286,6 @@ export class BankService {
         }
       };
     } catch (error) {
-      console.log(error)
       return this.handleErrors(error,'findTransactions')
     }
   }
@@ -375,7 +372,6 @@ export class BankService {
 
       return res.status(200).json({message:'transaction completed successfully'});
     } catch (error) {
-      console.log(error)
       return res.status(400).json({message:'Something went wrong at deposit'});
     }
   }
@@ -416,7 +412,6 @@ export class BankService {
 
       return res.status(200).json({message:'transaction completed successfully'});
     } catch (error) {
-      console.log(error)
       return res.status(400).json({message:'Something went wrong at deposit'});
     }
   }
@@ -497,7 +492,6 @@ export class BankService {
 
       return {message:'Investment completed successfully'};
     } catch (error) {
-      console.log(error)
       return this.handleErrors(error,'invest')
     }
   }
@@ -571,7 +565,7 @@ export class BankService {
       const admin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: In([0,1])
+          role: In([Roles.ADMIN,Roles.OPERATOR])
         }}
       );
 
@@ -624,7 +618,6 @@ export class BankService {
       };
     
     } catch (error) {
-      console.log(error)
       return this.handleErrors(error,'findTransactionsAdmin')
     }
   }
@@ -634,7 +627,7 @@ export class BankService {
       const admin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: In([0,1])
+          role: In([Roles.ADMIN,Roles.OPERATOR])
         }}
       );
       if(!admin){
@@ -666,7 +659,6 @@ export class BankService {
       return {message:'Transaction updated successfully'};
       
     } catch (error) {
-      console.log(error)
       return this.handleErrors(error,'manageDeposit')
     }
   }
@@ -678,7 +670,7 @@ export class BankService {
       const admin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: In([0,1])
+          role: In([Roles.ADMIN,Roles.OPERATOR])
         }}
       );
       if(!admin){
@@ -730,7 +722,6 @@ export class BankService {
       return res.status(200).json({message:'Transaction updated successfully'});
       
     } catch (error) {
-      console.log(error)
       return this.handleErrors(error,'manageWithdraw')
     }
   }
@@ -740,7 +731,7 @@ export class BankService {
       const admin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: In([0,1])
+          role: In([Roles.ADMIN,Roles.OPERATOR])
         }}
       );
 
@@ -800,7 +791,7 @@ export class BankService {
       const admin= await this.userRepository.findOne({
         where:{
           id:token,
-          role: In([0,1])
+          role: In([Roles.ADMIN,Roles.OPERATOR])
         }}
       );
 
