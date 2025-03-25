@@ -732,8 +732,12 @@ export class BillingsService {
         where: {
           available_to_invest: true,
           status: searchOportunityDto.status ? searchOportunityDto.status : null,
-          auction_close_date: searchOportunityDto.closeDate ? dayjs(searchOportunityDto.closeDate, 'DD/MM/YYYY').toDate() : null,
-          payment_date: searchOportunityDto.paymentDate ? dayjs(searchOportunityDto.paymentDate,'DD/MM/YYYY').toDate() : null,
+          auction_close_date: searchOportunityDto.closeDate ?
+            Raw( alias=> `DATE(${alias}) = STR_TO_DATE('${searchOportunityDto.closeDate}','%d/%m/%Y')`)
+            : null,
+          payment_date: searchOportunityDto.paymentDate ?
+            Raw( alias=> `DATE(${alias}) = STR_TO_DATE('${searchOportunityDto.paymentDate}','%d/%m/%Y')`)
+            : null,
         },
         relations: ['payer','payer.risk','billing'],
         order: {
