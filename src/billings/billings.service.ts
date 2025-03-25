@@ -46,7 +46,7 @@ export class BillingsService {
     const token = req.headers['token'] as string;
     const { search } = req.query;
     const isAdmin = await this.userRepository.findOne({ 
-      where: { id: token, role: Roles.ADMIN } ,
+      where: { id: token, role: Roles.OPERATOR } ,
       relations: ['operator'],
     });
     if (!isAdmin) {

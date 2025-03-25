@@ -195,7 +195,7 @@ export class PayerService {
     const {search}=req.query
     const token = req.headers['token'] as string;
     const isAdmin = await this.userRepository.findOne({
-      where: { id: token, role: Roles.ADMIN },
+      where: { id: token, role: Roles.OPERATOR },
       relations: ['operator'],
     });
 
