@@ -511,8 +511,10 @@ export class BankService {
           },
           investment: {
             status: searchInvestmentDto.status ? searchInvestmentDto.status : null,
-            auction_close_date: searchInvestmentDto.closeDate ? dayjs(searchInvestmentDto.closeDate,'DD/MM/YYYY').toDate() : null,
-            payment_date: searchInvestmentDto.paymentDate ? dayjs(searchInvestmentDto.paymentDate,'DD/MM/YYYY').toDate() : null
+            auction_close_date: searchInvestmentDto.closeDate ?
+              Raw(alias => `DATE(${alias}) = STR_TO_DATE('${searchInvestmentDto.closeDate}', '%d/%m/%Y')`) : null,
+            payment_date: searchInvestmentDto.paymentDate ? 
+              Raw(alias => `DATE(${alias}) = STR_TO_DATE('${searchInvestmentDto.paymentDate}', '%d/%m/%Y')`) : null,
           }
         },
         
