@@ -517,7 +517,9 @@ export class BankService {
               Raw(alias => `DATE(${alias}) = STR_TO_DATE('${searchInvestmentDto.paymentDate}', '%d/%m/%Y')`) : null,
           }
         },
-        
+        order: {
+          investment: { auction_close_date: 'DESC' },
+        },
         relations:['investment','investment.payer','investment.payer.risk', 'investment.payer.billing'],
         skip: (page - 1) * limit,
         take: limit

@@ -598,6 +598,9 @@ export class BillingsService {
           name: searchOperationsDto.clientName ? Like(`%${searchOperationsDto.clientName}%`) : null,
         },
         relations: ['billing', 'payer'],
+        order:{
+          createdAt: 'DESC',
+        },
         skip: (page - 1) * limit,
         take: limit
       });
@@ -741,7 +744,7 @@ export class BillingsService {
         },
         relations: ['payer','payer.risk','billing'],
         order: {
-          createdAt: 'DESC'
+          auction_close_date: 'DESC'
         },
         skip: (page - 1) * limit,
         take: limit
