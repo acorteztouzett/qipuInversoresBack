@@ -65,7 +65,8 @@ export class BillingsService {
       order: {
         company_name: 'ASC',
         billing: {
-          payer: { full_name: 'ASC'},
+          createdAt: 'DESC',
+          payer: { full_name: 'ASC' },
         },
       },
     });
@@ -127,6 +128,7 @@ export class BillingsService {
       order: {
         company_name: 'ASC',
         billing: {
+          createdAt: 'DESC',
           payer: { full_name: 'ASC'}
         },
       },
@@ -188,7 +190,10 @@ export class BillingsService {
         payer: { name_debtor: Like(`%${search}%`) },
       },
       relations: ['payer', 'operation'],
-      order: { payer: { name_debtor: 'ASC' } },
+      order: { 
+        createdAt: 'DESC',
+        payer: { name_debtor: 'ASC' } 
+      },
     });
     
     if (bills.length === 0) {
@@ -552,7 +557,11 @@ export class BillingsService {
     await this.operationRepository.save(newOperation);
     
     const operation = await this.operationRepository.findOne({
-      where: { n_operation: req.body.n_operation },
+      where: { 
+        n_operation: req.body.n_operation,
+        currency: req.body.currency,
+        payer: payer,
+      },
     });
     
     if (!operation) {

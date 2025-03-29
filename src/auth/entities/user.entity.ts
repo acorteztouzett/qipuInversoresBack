@@ -68,7 +68,9 @@ export class User {
     })
     pep: boolean;
 
-    @Column('varchar')
+    @Column('varchar',{
+        default:'0'
+    })
     terms_conditions: string;
 
     @Column('varchar')
