@@ -520,9 +520,11 @@ export class AuthService {
   }
 
   async resetToken(@Req() req: Request,@Res() res: Response){
-    const { token } = req.body;
+    const { token, isInvestor=false } = req.body;
+    
+    const repository = isInvestor ? this.investorRepository : this.userRepository;  
 
-    const user = await this.userRepository.findOne({ where: { resetpass: token } });
+    const user = await repository.findOne({ where: { resetpass: token } });
 
     if (!user) {
       throw new HttpException({ msg: 'Token inválido' }, HttpStatus.BAD_REQUEST);

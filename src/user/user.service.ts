@@ -10,6 +10,7 @@ import { templateResetear, templateVerificar, templateVerificarAdmin } from 'src
 import { customAlphabet } from 'nanoid';
 import { Request, Response } from 'express';
 import { Roles } from 'src/utils/enums/general-status.enums';
+import { Investor } from 'src/auth/entities/investor.entity';
 
 @Injectable()
 export class UserService {
@@ -19,6 +20,8 @@ export class UserService {
       private readonly userRepository: Repository<User>,
       @InjectRepository(Operator)
       private readonly operatorRepository: Repository<Operator>,
+      @InjectRepository(Investor)
+      private readonly investorRepository: Repository<Investor>,
       private readonly mailerService:MailerService,
   ) {}
 
@@ -480,24 +483,45 @@ export class UserService {
     }
 
     async forgotPassword(@Req() req, @Res() res){
-      const user = await this.userRepository.findOne({ where:{ email:req.body.email} });
+      const { email, isInvestor = false, ruc } = req.body;
+
+      const repository = isInvestor ? this.investorRepository : this.userRepository;
+      const whereCondition: any = { email };
+      if (isInvestor) {
+        whereCondition.document = ruc;
+      } else {
+        if (ruc !== null && ruc !== undefined) {
+          whereCondition.ruc = ruc;
+        } else {
+          whereCondition.role = In([0, 1]);
+        }
+      }
+
+      const user = await repository.findOne({
+        where: whereCondition,
+      });
+
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
   
       const token = customAlphabet(this.alphabet,6)().toUpperCase();
       
-      if (user.role !== 2) {
-        user.resetpass = token;
-        await this.userRepository.update(user.id, { resetpass: token , reset_token: new Date(Date.now()+300000) });
-      } else if (req.body.ruc) {
-        user.resetpass = token;
-        await this.userRepository.update(user.id, { resetpass: token , reset_token: new Date(Date.now()+300000) });
-      } else {
-        throw new HttpException('RUC is required for this user role', HttpStatus.BAD_REQUEST);
+      if(isInvestor){
+        if ('user_id' in user) await this.investorRepository.update(user.user_id, { resetpass: token, reset_token: new Date(Date.now() + 300000) });
+      } else if (!isInvestor){
+        if ('id' in user && user.role !==2) 
+          await this.userRepository.update(user.id, { resetpass: token, reset_token: new Date(Date.now() + 300000) });
+        else if ('id' in user && ruc)
+          await this.userRepository.update(user.id, { resetpass: token , reset_token: new Date(Date.now()+300000) });
+        else throw new HttpException('RUC is required for this user role', HttpStatus.BAD_REQUEST);
       }
   
-      const template = templateResetear(user.name, token, user.email);
+      const template = templateResetear(
+        'name' in user ? user.name : `${user.names } ${user.surname}`, 
+        token, 
+        user.email
+      );
       await this.mailerService.sendMail({
         to: user.email,
         subject: 'Recuperar contraseña Qipu Finance',
@@ -508,8 +532,12 @@ export class UserService {
     }
 
     async resetPassword(@Req() req, @Res() res){
-      const {password,password2,token}=req.body
-      const user=await this.userRepository.findOne({where:{resetpass:token}})
+      const {password,password2,token, isInvestor=false}=req.body
+      
+      const repository = isInvestor ? this.investorRepository : this.userRepository;
+
+      const user = await repository.findOne({ where: { resetpass: token } });
+
       if(!user){
         return res.status(400).json({msg:'invalid token'})
       }
@@ -518,13 +546,20 @@ export class UserService {
         return res.status(400).json({msg:'expired token'})
       }
 
-      if(password===password2){
-        const newPassword=hashSync(password,10)
-        await this.userRepository.update(user.id,{ password:newPassword ,status:true ,resetpass:null,reset_token:null})
-        res.status(200).json({msg:'password updated successfully'})
-      }else{
+      if(password!==password2){
         return res.status(401).json({msg:'invalid password'})
       }
+      
+      const newPassword=hashSync(password,10)
+      
+      if ('user_id' in user) {
+        await this.investorRepository.update(user.user_id, { password: newPassword, status: 1, resetpass: null, reset_token: null });
+      }
+      if ('id' in user) {
+        await this.userRepository.update(user.id, { password: newPassword, status: true, resetpass: null, reset_token: null });
+      }
+      
+      res.status(200).json({msg:'password updated successfully'})
     }
 
     async emailUser(@Req() req, @Res() res){

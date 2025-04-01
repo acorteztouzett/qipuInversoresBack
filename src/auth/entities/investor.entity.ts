@@ -107,6 +107,14 @@ export class Investor{
     })
     delete_request: string;
 
+    @Column('varchar')
+    resetpass: string;
+
+    @Column('timestamp',{
+        nullable:true
+    })
+    reset_token:Date;
+
     @OneToMany(() =>Company, company=>company.investor)
     company: Company[];
 
