@@ -467,7 +467,7 @@ export class UserService {
 
 
       req.body.password = hashSync(req.body.password, 10);
-      req.body.status = 0;
+      req.body.status = 1;
       req.body.operator = operator;
 
       const user = await this.userRepository.save(req.body);
