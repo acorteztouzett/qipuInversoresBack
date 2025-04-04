@@ -720,7 +720,11 @@ export class BillingsService {
 
       if (!operation) throw new NotFoundException('Operation not found');
 
-      const totalAmount = operation.billing.reduce((acc, bill) => acc + bill.net_amount, 0);
+      const totalAmount = operation.billing.reduce(
+        (acc, bill) => acc + Number(bill.net_amount), 
+        0
+      );
+    
       await this.operationRepository.update({ id: operationId }, {
         monthly_rate: createInvestmentDto.monthlyRate,
         auction_close_date: createInvestmentDto.auctionCloseDate,
