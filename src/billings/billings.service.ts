@@ -338,7 +338,7 @@ export class BillingsService {
       const token = req.headers['token'] as string;
       const user = await this.userRepository.findOne({ where: { id: token } });
       const payer= await this.payerRepository.findOne({ where: { id: req.body.contact_Id } });
-  
+
       if (!user) {
         throw new NotFoundException('User not found');
       }
@@ -348,8 +348,10 @@ export class BillingsService {
       }
       const pdf= req.files[0];
       const xml= req.files[1];
+
+      const net_amount= Number(req.body.amount) - Number(req.body.detraction);
           
-      const billing = this.billingRepository.create({ ...req.body,user, payer });
+      const billing = this.billingRepository.create({ ...req.body,net_amount,user, payer });
       await this.billingRepository.save(billing);
 
       const billSaved= await this.billingRepository.findOne({ where: { 
@@ -446,25 +448,33 @@ export class BillingsService {
     }
   }
   
-  async editBill(@Req() req: Request,@Res() res: Response){
+  async editBill(@Req() req: Request, @Res() res: Response) {
     const token = req.headers['token'] as string;
     const isAdmin = await this.userRepository.findOne({
-      where: { id: token, role: In([Roles.ADMIN,Roles.OPERATOR]) },
+      where: { id: token, role: In([Roles.ADMIN, Roles.OPERATOR]) },
     });
-    
+
     if (!isAdmin) {
       throw new UnauthorizedException('Permission denied');
     }
-    
+
     const bill = await this.billingRepository.findOne({
       where: { id: req.body.id },
     });
-    
+
     if (!bill) {
       throw new NotFoundException('Bill not found');
     }
-    
-    await this.billingRepository.update({ id: req.body.id }, req.body);
+
+    const updatedData = { ...req.body };
+
+    if (req.body.amount || req.body.detraction) {
+      const amount = req.body.amount ? Number(req.body.amount) : Number(bill.amount);
+      const detraction = req.body.detraction ? Number(req.body.detraction) : Number(bill.detraction);
+      updatedData.net_amount = amount - detraction;
+    }
+
+    await this.billingRepository.update({ id: req.body.id }, updatedData);
     return { msg: 'Updated successfully' };
   }
   
