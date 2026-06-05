@@ -41,6 +41,11 @@ export class AuthController {
     return this.authService.verifyUser(body);
   }
 
+  @Post('resend-verification')
+  resendVerification(@Body() {email, country}){
+    return this.authService.resendVerificationEmail(email, country);
+  }
+
   @Put('change-password')
   changePassword(@Headers('token') token, @Body() {password}) {
     return this.authService.changePassword(token, password);

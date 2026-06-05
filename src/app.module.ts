@@ -41,7 +41,7 @@ import { RequestLoggerMiddleware } from './util/middleware/request-logger.middle
     }),
     ThrottlerModule.forRoot([{
       ttl: 60000, // milliseconds
-      limit: 30, // requests
+      limit: 50, // requests
     }]),
     AuthModule,
     AwsModule,

@@ -26,7 +26,7 @@ import { GeneralStatus } from 'src/utils/enums/general-status.enums';
 
 @Injectable()
 export class AuthService {
-  private alphabet='1234567890abcdefghijklmnopqrstuvwx';
+  private alphabet='0123456789';
   constructor(
     @InjectRepository(Investor)
     private readonly investorRepository: Repository<Investor>,
@@ -69,7 +69,7 @@ export class AuthService {
 
       await this.checkInvestorCreation(userData.email,userData.document,userData.country);
 
-      const tokenVerification=customAlphabet(this.alphabet,10)();
+      const tokenVerification=customAlphabet(this.alphabet,6)();
 
       const user=this.investorRepository.create({
         country: userData.country,
@@ -166,13 +166,44 @@ export class AuthService {
     }
   }
 
+  async resendVerificationEmail(email:string, country:string){
+    try {
+      const investor = await this.investorRepository.findOne({
+        where: { email, country }
+      });
+
+      if (!investor) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      if (investor.status === 1) {
+        throw new BadRequestException('User already verified');
+      }
+
+      const newToken = customAlphabet(this.alphabet, 6)();
+
+      await this.investorRepository.update(investor.user_id, {
+        token: newToken
+      });
+
+      await this.sendVerificationEmail(newToken, investor.names, investor.surname, investor.email);
+
+      return {
+        message: 'Verification email sent successfully',
+        email: investor.email
+      };
+    } catch (error) {
+      this.handleErrors(error, 'resendVerificationEmail');
+    }
+  }
+
   async sendVerificationEmail(token:string, names:string,surname:string,email:string){
     try {
 
       await this.mailerService.sendMail({
         from:process.env.MAIL_USER,
         to:email,
-        subject:`Bienvenido a Qipu Finance, tu código de activación es ${token}`,
+        subject:`Bienvenido a QF Factoring, tu código de activación es ${token}`,
         cc:'luis.moralesponce@gmail.com',
         html:templateVerificarCuenta(`${names} ${surname}`, token, email),
       })
@@ -555,7 +586,7 @@ export class AuthService {
     if(error instanceof BadRequestException){
       throw new BadRequestException(error.message)
     }
-    
+
     throw new InternalServerErrorException(`Something went wrong at ${type}`)
   }
 }
