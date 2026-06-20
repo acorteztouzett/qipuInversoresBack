@@ -203,7 +203,7 @@ export class AuthService {
       await this.mailerService.sendMail({
         from:process.env.MAIL_USER,
         to:email,
-        subject:`Bienvenido a QF Factoring, tu código de activación es ${token}`,
+        subject:`Bienvenido a Qipu Factoring, tu código de activación es ${token}`,
         html:templateVerificarCuenta(`${names} ${surname}`, token, email),
       })
 

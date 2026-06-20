@@ -327,7 +327,7 @@ export class UserService {
             const template = templateVerificarAdmin(user.name, user.email);
             await this.mailerService.sendMail({
               to: user.email,
-              subject: 'Validación de cuenta Qipu Finance',
+              subject: 'Validación de cuenta Qipu Factoring',
               html: template,
             })
             return {
@@ -340,7 +340,7 @@ export class UserService {
         const template = templateVerificar(user.name, user.email,'','');
         await await this.mailerService.sendMail({
           to: user.email,
-          subject: 'Validación de cuenta Qipu Finance',
+          subject: 'Validación de cuenta Qipu Factoring',
           html: template,
         })
     
@@ -443,7 +443,7 @@ export class UserService {
       const template= templateVerificar(user.name,user.email,user.ruc,user.company_name)
       await this.mailerService.sendMail({
           to:user.email,
-          subject:'Validación de cuenta Qipu Finance',
+          subject:'Validación de cuenta Qipu Factoring',
           html:template
       })
 
@@ -475,7 +475,7 @@ export class UserService {
       const template = templateVerificar(user.name, user.email, user.ruc, user.company_name);
       await this.mailerService.sendMail({
         to: user.email,
-        subject: 'Validación de cuenta Qipu Finance',
+        subject: 'Validación de cuenta Qipu Factoring',
         html: template,
       });
 
@@ -524,7 +524,7 @@ export class UserService {
       );
       await this.mailerService.sendMail({
         to: user.email,
-        subject: 'Recuperar contraseña Qipu Finance',
+        subject: 'Recuperar contraseña Qipu Factoring',
         html: template,
       });
   
